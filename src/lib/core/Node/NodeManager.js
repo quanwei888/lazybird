@@ -88,6 +88,25 @@ export class NodeManager {
         return false;
     }
 
+    static getRootNode(nodeId) {
+        let node = this.getNode(nodeId);
+        while (node && node.parentId) {
+            node = this.getNode(node.parentId);
+        }
+        return node;
+    }
+
+    static findAncestorByType(nodeId, type) {
+        let node = this.getNode(nodeId);
+        while (node) {
+            if (node.type === type) {
+                return node;
+            }
+            node = this.getNode(node.parentId);
+        }
+        return null;
+    }
+
     static printNodeTree(nodeId = null, level = 0) {
         if (nodeId === null) {
             // Print all root nodes

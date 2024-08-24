@@ -3,6 +3,8 @@ import {useQuery} from "@tanstack/react-query";
 import {loadProject} from "./TestProject.js";
 import {NodeManager} from "../Node/index.js";
 import {Project} from "./Project.js";
+import page from "@/lib/core/UI/Page.js";
+import _ from "lodash";
 
 // 定义 Context
 export const ProjectContext = createContext();
@@ -22,8 +24,31 @@ export const ProjectProvider = ({children}) => {
     }, [data]);
 
     const actions = {
-        setCurentDrop(dropId, index) {
-
+        setCurrentDrop(drop) {
+            //console.log('setCurrentDrop', drop);
+            if (!_.isEqual(drop, page.curentDrop)) {
+                console.log('555,setCurrentDrop', page.curentDrop, drop);
+                page.curentDrop = drop;
+                this.reload();
+            }
+        },
+        setCurentPage(page) {
+            if (page === project.currentPage) {
+                project.currentPage = page;
+                this.reload();
+            }
+        },
+        setSelectedId(id) {
+            if (id !== project.selectedId) {
+                project.selectedId = id;
+                this.reload();
+            }
+        },
+        setDraggingId(id) {
+            if (id !== project.draggingId) {
+                project.draggingId = id;
+                this.reload();
+            }
         },
         reload: () => {
             const currentPageNode = NodeManager.getNode(project.currentPage.id);
@@ -40,6 +65,7 @@ export const ProjectProvider = ({children}) => {
             updatedProject.overId = project.overId;
             updatedProject.draggingId = project.draggingId;
             updatedProject.nodes = Object.keys(NodeManager.nodes).length;
+            updatedProject.currentDrop = page.curentDrop;
 
 
             setProject(updatedProject);
@@ -47,7 +73,7 @@ export const ProjectProvider = ({children}) => {
     };
 
     return (
-        <ProjectContext.Provider value={{project, ...actions}}>
+        <ProjectContext.Provider value={{project, actions}}>
             {children}
         </ProjectContext.Provider>
     );

@@ -7,20 +7,20 @@ import RenderNode from "@/components/Canvas/RenderNode.jsx";
 import log from 'loglevel';
 
 export const Node = ({node}) => {
-    const {project, reload} = useProject();
-    const [insertIndex, setInsertIndex] = useState(null);
+    const {project, actions} = useProject();
     const [currentDraggingItem, setCurrentDraggingItem] = useState(null);
-    //const node = NodeManager.getNode(id);
 
+    // 使用useDrag钩子来处理拖拽逻辑
     const [{isDragging}, drag, preview] = useDrag({
         type: "Node",
         item: () => {
             console.log('Drag started');
-            project.draggingId = node.id;
-            project.selectedId = node.id;
-            reload()
+            actions.setSelectedId(node.id);
+            actions.setDraggingId(node.id);
+
             const {width, height} = ref.current.getBoundingClientRect();
-            return {node, width, height};
+            const item = {node, width, height};
+            return item;
         },
         canDrag: () => node.option.canDrag,
         collect: (monitor) => ({
@@ -32,20 +32,23 @@ export const Node = ({node}) => {
             } else {
                 console.log('Drag ended without drop');
             }
-            project.draggingId = null;
-            project.overId = null;
-            reload();
+            actions.setDraggingId(null);
+            actions.setCurrentDrop(null);
         },
     });
+
+    // 使用useEffect来设置拖拽预览图像
     useEffect(() => {
         preview(getEmptyImage(), {captureDraggingState: true});
     }, []);
 
+    // 判断是否可以放置
     const canDrop = (item) => {
         const sourceNode = item.node;
-        NodeManager.isAncestor(sourceNode.id, node.id)
         return node.option.canDrop && !NodeManager.isAncestor(sourceNode.id, node.id);
     };
+
+    // 计算插入索引
     const calculateInsertIndex = (sourceNode, targetNode, monitor) => {
         const hoverBoundingRect = ref.current.getBoundingClientRect(); // 获取当前元素的边界矩形
         const clientOffset = monitor.getClientOffset(); // 获取鼠标偏移
@@ -61,13 +64,11 @@ export const Node = ({node}) => {
             const childBoundingRect = childElement.getBoundingClientRect();
             const childMiddleY = (childBoundingRect.bottom + childBoundingRect.top) / 2 - hoverBoundingRect.top;
             const childMiddleX = (childBoundingRect.right + childBoundingRect.left) / 2 - hoverBoundingRect.left;
-            //log.debug("childMiddleY", childMiddleY, "childMiddleX", childMiddleX)
-            //log.debug(1234,targetNode.constructor.name)
+
             // 根据布局方向判断插入位置
             if ((targetNode.direction() === "vertical" && hoverClientY < childMiddleY) ||
                 (targetNode.direction() === "horizontal" && hoverClientX < childMiddleX)) {
                 insertIndex = i;
-                //log.debug(111, insertIndex, targetNode.direction(), childMiddleY, hoverClientY)
                 break;
             }
         }
@@ -76,15 +77,14 @@ export const Node = ({node}) => {
         if (sourceNode.parentId === node.id) {
             const sourceIndex = targetChildren.indexOf(sourceNode.id);
             if (sourceIndex === insertIndex || sourceIndex === insertIndex - 1) {
-                //log.debug(555, sourceNode.id)
-                return -1;
+                return null;
             }
         }
 
         return insertIndex;
     };
 
-
+    // 使用useDrop钩子来处理放置逻辑
     const [{isOverCurrent, isOver}, drop] = useDrop({
         accept: 'Node',
         canDrop,
@@ -93,46 +93,54 @@ export const Node = ({node}) => {
             if (!canDrop(item)) {
                 return;
             }
-            if (project.overId == node.id) {
+            if (currentDrop.id == node.id) {
                 const pos = calculateInsertIndex(sourceNode, node, monitor)
                 log.info(`[${sourceNode.id}] drop into pos [${pos}]  of [${node.id}]`);
                 if (pos >= 0) {
                     NodeManager.insertNode(sourceNode.id, node.id, pos);
-                    reload();
                 }
             }
-            setInsertIndex(null);
+            actions.setCurrentDrop(null)
         },
         hover: (item, monitor) => {
             const sourceNode = item.node;
 
             // 1) 设置 OverId
+            // 如果当前节点是被悬停的节点
             if (isOverCurrent) {
                 // 1-1）从该节点往上找尝试找到可以drop 的节点targetNode
+                // 初始化目标节点为当前节点
                 let targetNode = node;
+                // 向上遍历父节点，直到找到可以放置的节点或到达根节点
                 while (targetNode && (!targetNode.option.canDrop || NodeManager.isAncestor(sourceNode.id, targetNode.id))) {
-                    targetNode = NodeManager.getNode(targetNode.parentId)
+                    targetNode = NodeManager.getNode(targetNode.parentId);
                 }
 
+                // 如果找到了可以放置的目标节点，设置currentDrop的id为目标节点的id
                 if (targetNode) {
-                    //找到了
-                    if (project.overId != targetNode.id) {
-                        project.overId = targetNode.id;
-                        reload()
-                    }
+                    currentDrop.id = targetNode.id;
+                    currentDrop.index = null;
+                    actions.setCurrentDrop(currentDrop);
                 }
             }
 
-
             // 2) 如果正好是 overId 的 node
-            if (project.overId == node.id) {
-                const pos = calculateInsertIndex(sourceNode, node, monitor)
-                log.debug(`[${sourceNode.id}] hover into pos [${pos}]  of [${node.id}]`);
-                if (insertIndex !== pos) {
-                    setInsertIndex(pos);
+            // 如果当前悬停的节点是currentDrop的目标节点
+            if (currentDrop.id == node.id) {
+                // 计算插入位置
+                const pos = calculateInsertIndex(sourceNode, node, monitor);
+
+                // 如果计算出的插入位置与currentDrop中的位置不同，更新拖拽项
+                if (pos !== currentDrop.index) {
                     setCurrentDraggingItem(item);
-                    reload();
                 }
+                // 更新currentDrop的id和index
+                currentDrop.id = node.id;
+                currentDrop.index = pos;
+                actions.setCurrentDrop(currentDrop);
+            } else {
+                // 如果当前悬停的节点不是currentDrop的目标节点，清空拖拽项
+                setCurrentDraggingItem(null);
             }
         },
         collect: (monitor) => ({
@@ -141,10 +149,12 @@ export const Node = ({node}) => {
         }),
     });
 
-    log.debug(`[Render][Node.${node.id}]`);
+    log.debug(`[Node][Node.${node.id}]`, project.currentDrop);
+    const currentDrop = project.currentDrop ? project.currentDrop : {id: null, index: null};
     const ref = useRef(null);
     drag(drop(ref));
 
+    // 占位符组件
     const Placeholder = () => {
         const style = {
             width: currentDraggingItem.width,
@@ -159,11 +169,12 @@ export const Node = ({node}) => {
         <RenderNode node={node} ref={ref}>
             {node.children.map((childId, index) => (
                 <React.Fragment key={childId}>
-                    {project.overId == node.id && index === insertIndex && <Placeholder/>}
+                    {currentDraggingItem && currentDrop.id == node.id && index === currentDrop.index && <Placeholder/>}
                     <Node key={childId} node={NodeManager.getNode(childId)}/>
                 </React.Fragment>
             ))}
-            {project.overId == node.id && node.children.length === insertIndex && <Placeholder/>}
-        < /RenderNode>
+            {currentDraggingItem && currentDrop.id == node.id && node.children.length === currentDrop.index &&
+                <Placeholder/>}
+        </RenderNode>
     )
 }

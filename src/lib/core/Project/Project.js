@@ -9,6 +9,11 @@ export class Project {
         this.selectedId = null;
         this.overId = null;
         this.draggingId = null;
-        this.nodes = null;
+        this.currentDrop = null;
+        /*{
+            id: null,
+            index: null,
+        }
+         */
     }
 }

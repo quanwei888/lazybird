@@ -4,11 +4,12 @@ import {forwardRef} from "react";
 import {Node} from "@/components/Canvas/Node.jsx";
 import {NodeManager} from "@/lib/core/index.js";
 
-export const UIComponent = forwardRef(({id,node, className = ""}, ref) => {
+export const UIComponent = forwardRef(({children,id,node, className = ""}, ref) => {
     return (
         <div ref={ref} id={id} className={className}>
             {id}
             {node && <Node node={node}/>}
+            {children}
         </div>
     )
 })
