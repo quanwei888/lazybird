@@ -10,7 +10,7 @@ export class NodeType extends Serializable {
 
     static ID = 0
 
-    constructor({id, name, attributeIds = [], defaultValues = {}, defaultChildren = [], option = {}}) {
+    constructor({id, name, attributes = [], option = {}}) {
         super();
         this.id = id;
         this.name = name;
@@ -18,71 +18,54 @@ export class NodeType extends Serializable {
         this.option.canDrag = option.canDrag ?? true;
         this.option.canDrop = option.canDrop ?? true;
         this.option.allowedEditAttribute = option.allowedEditAttribute ?? [];
-        this.oldDefaultValues = null;
-        this.attributes = attributeIds.map(attrId => {
-            const attribute = AttributeManager.getAttribute(attrId);
-            if (!attribute) {
-                throw new Error(`Attribute with id ${attrId} is not defined.`);
-            }
-            return attribute;
-        });
-        this.defaultValues = {};
-        this.defaultChildren = defaultChildren;
-
-        this.attributes.forEach(attribute => {
-            this.defaultValues[attribute.id] = defaultValues[attribute.id] ?? attribute.defaultValue;
-        });
+        this.attributes = attributes;
     }
 
     getAttributes() {
         return this.attributes;
     }
 
+    getAttribute(id) {
+        return this.attributes.find(attribute => attribute.id === id);
+    }
+
     generateUniqueId() {
         return `${this.id}_${NodeType.ID++}`;
     }
 
-    cloneDefaultChildren(parentId = null) {
-        const createNodeWithNewIds = (node, newParentId = null) => {
-            const newId = this.generateUniqueId();
-            const nodeType = NodeTypeManager.getNodeType(node.nodeTypeId);
-            const newNode = nodeType.newNode(newId, parentId);
-            newNode.attributes = {...node.attributes};
-            newNode.parentId = newParentId;
-            newNode.children = node.children.map(childId => {
-                const childNode = NodeManager.getNode(childId);
-                return createNodeWithNewIds(childNode, newNode).id;
-            });
-            return newNode;
-        };
-
-        return this.defaultChildren.map(childId => createNodeWithNewIds(NodeManager.getNode(childId), parentId).id);
-    }
 
     createNode(values = {}) {
         const id = this.generateUniqueId(); // Use instance method
         const node = this.newNode(id, this.id);
         node.option = this.option;
+
+        const ignoredIds = ["id", "parentId", "children"];
         this.attributes.forEach(attribute => {
-            node.attributes[attribute.id] = values[attribute.id] ?? this.defaultValues[attribute.id];
+            if (ignoredIds.includes(attribute.id)) {
+                return;
+            }
+            const value = values[attribute.id] ?? attribute.getValue();
+            if (!attribute.isValid(value)) {
+                throw new Error(`Invalid value for attribute ${attribute.id}.`);
+            }
+            node.attributes[attribute.id] = value;
         });
-        node.children = this.cloneDefaultChildren(node.id);
+
+        node.children = [];
+
+        const childrenAttribute = this.getAttribute("children");
+        if (childrenAttribute) node.children = childrenAttribute.getValue(node.id);
+
+        //node.children = this.cloneDefaultChildren(node.id);
         return node;
     }
 
     updateNode(node) {
         this.attributes.forEach(attribute => {
-            if (!_.isEqual(node.attributes[attribute.id], this.oldDefaultValues?.[attribute.id])) {
-                //如果属性被修改过，则不更新默认值
-                return;
-            }
-            node.attributes[attribute.id] = this.defaultValues[attribute.id];
+            node.attributes[attribute.id] = attribute.getValue();
         });
 
         node.children = this.cloneDefaultChildren(node.id);
-        //if (areObjectsEqualExcludingField({ children: node.children }, { children: this.defaultChildren }, "id")) { // Fix typo
-        //    node.children = this.cloneDefaultChildren(node.id);
-        //}
     }
 
     updateAllNodes() {
@@ -98,23 +81,6 @@ export class NodeType extends Serializable {
         NodeManager.addNode(node);
         return node;
     }
-
-    setDefaultChildren(children) {
-        this.defaultChildren = children;
-    }
-
-    getDefaultChildren() {
-        return this.defaultChildren;
-    }
-
-    setDefaultValues(values) {
-        this.oldDefaultValues = this.defaultValues;
-        this.defaultValues = values;
-    }
-
-    getDefaultValues() {
-        return this.defaultValues;
-    }
 }
 
 Serializable.registerClass(NodeType);
@@ -123,7 +89,9 @@ export class ComponentNodeType extends NodeType {
 
 
     newNode(id, nodeTypeId, parentId) {
-        return new ComponentNode({id: id, nodeTypeId: this.id, parentId: parentId});
+        const node = new ComponentNode({id: id, nodeTypeId: this.id, parentId: parentId});
+        NodeManager.addNode(node);
+        return node;
     }
 }
 
@@ -133,7 +101,9 @@ export class SlotNodeType extends NodeType {
 
 
     newNode(id, nodeTypeId, parentId) {
-        return new SlotNode({id: id, nodeTypeId: this.id, parentId: parentId});
+        const node = new SlotNode({id: id, nodeTypeId: this.id, parentId: parentId});
+        NodeManager.addNode(node);
+        return node;
     }
 }
 

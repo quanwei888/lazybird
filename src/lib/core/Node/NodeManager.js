@@ -47,7 +47,7 @@ export class NodeManager {
         node.parentId = parentId;
         const parentNode = this.getNode(parentId);
         // 将新节点插入到父节点的子节点列表中的指定位置
-        console.log(`Inserting  [${nodeId}] into [${position}] of [${parentNode.id}]`, this.nodes);
+        //console.log(`Inserting  [${nodeId}] into [${position}] of [${parentNode.id}]`, this.nodes);
         this.insertAtPosition(parentNode.children, node.id, position);
     }
 
@@ -86,5 +86,26 @@ export class NodeManager {
             node = this.getNode(node.parentId);
         }
         return false;
+    }
+
+    static printNodeTree(nodeId = null, level = 0) {
+        if (nodeId === null) {
+            // Print all root nodes
+            for (const [id, node] of this.nodes) {
+                if (!node.parentId) {
+                    this.printNodeTree(id, level);
+                }
+            }
+        } else {
+            const node = this.getNode(nodeId);
+            if (node) {
+                console.log(' '.repeat(level * 2) + node.id + ' - ' + node.parentId);
+                if (node.children) {
+                    for (const childId of node.children) {
+                        this.printNodeTree(childId , level + 1);
+                    }
+                }
+            }
+        }
     }
 }

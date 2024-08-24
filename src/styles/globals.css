@@ -76,3 +76,7 @@
     @apply bg-background text-foreground;
   }
 }
+
+.selectable:hover:not(:has(.selectable:hover)) {
+  outline: 1px solid blue;
+}

@@ -1,9 +1,8 @@
 import React, {createContext, useContext, useEffect, useState} from 'react';
 import {useQuery} from "@tanstack/react-query";
-import _ from 'lodash';
 import {loadProject} from "./TestProject.js";
 import {NodeManager} from "../Node/index.js";
-import {Project} from "@/core/Project/Project.js";
+import {Project} from "./Project.js";
 
 // 定义 Context
 export const ProjectContext = createContext();
@@ -23,6 +22,9 @@ export const ProjectProvider = ({children}) => {
     }, [data]);
 
     const actions = {
+        setCurentDrop(dropId, index) {
+
+        },
         reload: () => {
             const currentPageNode = NodeManager.getNode(project.currentPage.id);
             const updatedCurrentPage = {
