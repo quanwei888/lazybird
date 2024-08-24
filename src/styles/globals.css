@@ -77,6 +77,6 @@
   }
 }
 
-.selectable:hover:not(:has(.selectable:hover)) {
+.can-be-hovered:hover:not(:has(.can-be-hovered:hover)) {
   outline: 1px solid blue;
 }

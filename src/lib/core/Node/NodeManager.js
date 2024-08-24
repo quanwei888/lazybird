@@ -1,5 +1,6 @@
 // 节点管理器
 import {NodeTypeManager} from "./NodeTypeManager.js";
+import {ComponentNode} from "@/lib/core/index.js";
 
 export class NodeManager {
     static nodes = new Map();
@@ -96,15 +97,15 @@ export class NodeManager {
         return node;
     }
 
-    static findAncestorByType(nodeId, type) {
-        let node = this.getNode(nodeId);
-        while (node) {
-            if (node.type === type) {
-                return node;
-            }
-            node = this.getNode(node.parentId);
+    static canEdit(nodeId) {
+        const rootOfNode = this.getRootNode(nodeId);
+        const node = this.getNode(nodeId)
+        let fisrtComponentAncestor = this.getNode(node.parentId);
+        while (fisrtComponentAncestor && !(fisrtComponentAncestor instanceof ComponentNode)) {
+            fisrtComponentAncestor = this.getNode(fisrtComponentAncestor.parentId);
         }
-        return null;
+
+        return (rootOfNode == fisrtComponentAncestor) || fisrtComponentAncestor === null;
     }
 
     static printNodeTree(nodeId = null, level = 0) {
@@ -121,7 +122,7 @@ export class NodeManager {
                 console.log(' '.repeat(level * 2) + node.id + ' - ' + node.parentId);
                 if (node.children) {
                     for (const childId of node.children) {
-                        this.printNodeTree(childId , level + 1);
+                        this.printNodeTree(childId, level + 1);
                     }
                 }
             }

@@ -22,7 +22,9 @@ export const Node = ({node}) => {
             const item = {node, width, height};
             return item;
         },
-        canDrag: () => node.option.canDrag,
+        canDrag: () => {
+            return node.option.canDrag && NodeManager.canEdit(node.id);
+        },
         collect: (monitor) => ({
             isDragging: monitor.isDragging(),
         }),
@@ -43,9 +45,8 @@ export const Node = ({node}) => {
     }, []);
 
     // 判断是否可以放置
-    const canDrop = (item) => {
-        const sourceNode = item.node;
-        return node.option.canDrop && !NodeManager.isAncestor(sourceNode.id, node.id);
+    const canDrop = (sourceNode, targetNode) => {
+        return node.option.canDrop && NodeManager.canEdit(node.id) && !NodeManager.isAncestor(sourceNode.id, targetNode.id);
     };
 
     // 计算插入索引
@@ -87,7 +88,7 @@ export const Node = ({node}) => {
     // 使用useDrop钩子来处理放置逻辑
     const [{isOverCurrent, isOver}, drop] = useDrop({
         accept: 'Node',
-        canDrop,
+        canDrop: (item) => canDrop(item.node, node),
         drop: (item, monitor) => {
             const sourceNode = item.node;
             if (!canDrop(item)) {
@@ -105,14 +106,12 @@ export const Node = ({node}) => {
         hover: (item, monitor) => {
             const sourceNode = item.node;
 
-            // 1) 设置 OverId
             // 如果当前节点是被悬停的节点
             if (isOverCurrent) {
-                // 1-1）从该节点往上找尝试找到可以drop 的节点targetNode
                 // 初始化目标节点为当前节点
                 let targetNode = node;
                 // 向上遍历父节点，直到找到可以放置的节点或到达根节点
-                while (targetNode && (!targetNode.option.canDrop || NodeManager.isAncestor(sourceNode.id, targetNode.id))) {
+                while (targetNode && !canDrop(sourceNode, targetNode)) {
                     targetNode = NodeManager.getNode(targetNode.parentId);
                 }
 
@@ -124,7 +123,6 @@ export const Node = ({node}) => {
                 }
             }
 
-            // 2) 如果正好是 overId 的 node
             // 如果当前悬停的节点是currentDrop的目标节点
             if (currentDrop.id == node.id) {
                 // 计算插入位置

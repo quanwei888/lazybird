@@ -14,7 +14,7 @@ const nodeType = new NodeType({
     option: {
         render: "UIStack",
         canDrop: true,
-        canDrag: true,
+        canDrag: true
     }
 })
 NodeTypeManager.addNodeType(nodeType);

@@ -13,7 +13,7 @@ export const Page = ({id}) => {
         let target = event.target;
         log.debug("Select Node", target);
 
-        while (target && !target.classList.contains('selectable')) {
+        while (target && !target.classList.contains('can-be-selected')) {
             target = target.parentElement;
         }
 
