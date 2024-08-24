@@ -1,12 +1,12 @@
 import { expect } from 'chai';
-import { Node, NodeTypeManager,NodeManager } from '../Node/index.js';
+import { Node, NodeTypeManager, NodeManager } from '../Node/index.js';
 import { AttributeManager, Attribute } from '../Attribute/index.js';
 
 describe('Node', () => {
     before(() => {
         // Setup mock attributes
-        AttributeManager.addAttribute(new Attribute('attr1', 'Attribute 1', 'default1'));
-        AttributeManager.addAttribute(new Attribute('attr2', 'Attribute 2', 'default2'));
+        AttributeManager.addAttribute(new Attribute({id: 'attr1', name: 'Attribute 1', defaultValue: 'default1'}));
+        AttributeManager.addAttribute(new Attribute({id: 'attr2', name: 'Attribute 2', defaultValue: 'default2'}));
         
         // Setup mock NodeType
         const nodeType = {
@@ -27,7 +27,6 @@ describe('Node', () => {
         NodeTypeManager.addNodeType(nodeType);
     });
     beforeEach(() => {
-        //NodeTypeManager.nodeTypes.clear();
         NodeManager.nodes.clear();
     });
 
@@ -38,26 +37,26 @@ describe('Node', () => {
     });
 
     it('should create a Node instance', () => {
-        const node = new Node('1', 'type1');
+        const node = new Node({id: '1', nodeTypeId: 'type1'});
         expect(node).to.be.an.instanceof(Node);
         expect(node.id).to.equal('1');
         expect(node.nodeTypeId).to.equal('type1');
     });
 
     it('should set and get attributes correctly', () => {
-        const node = new Node('1', 'type1');
+        const node = new Node({id: '1', nodeTypeId: 'type1'});
         node.setAttribute('attr1', 'value1');
         expect(node.getAttribute('attr1')).to.equal('value1');
     });
 
     it('should throw an error for invalid attribute', () => {
-        const node = new Node('1', 'type1');
+        const node = new Node({id: '1', nodeTypeId: 'type1'});
         expect(() => node.setAttribute('invalidAttr', 'value')).to.throw(Error, 'Attribute with id invalidAttr is not defined in NodeType type1.');
     });
 
     it('should throw an error for invalid attribute value', () => {
-        const node = new Node('1', 'type1');
-        const invalidAttribute = new Attribute('invalidAttr', 'Invalid Attribute', 'default');
+        const node = new Node({id: '1', nodeTypeId: 'type1'});
+        const invalidAttribute = new Attribute({id: 'invalidAttr', name: 'Invalid Attribute', defaultValue: 'default'});
         invalidAttribute.isValid = () => false;
         AttributeManager.addAttribute(invalidAttribute);
         NodeTypeManager.getNodeType('type1').attributes.push(invalidAttribute);
@@ -65,14 +64,14 @@ describe('Node', () => {
     });
 
     it('should handle circular references in getAttribute', () => {
-        const node = new Node('1', 'type1');
+        const node = new Node({id: '1', nodeTypeId: 'type1'});
         node.attributes['attr1'] = '{{attr2}}';
         node.attributes['attr2'] = '{{attr1}}';
         expect(() => node.getAttribute('attr1')).to.throw(Error, 'Circular reference detected for attribute: {{attr2}}');
     });
 
     it('should remove a node', () => {
-        const node = new Node('1', 'type1');
+        const node = new Node({id: '1', nodeTypeId: 'type1'});
         NodeManager.addNode(node);
         NodeManager.removeNode('1');
         expect(NodeManager.getNode('1')).to.be.undefined;

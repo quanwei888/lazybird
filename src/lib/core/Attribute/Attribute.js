@@ -1,12 +1,13 @@
-// 定义属性的结构
-export class Attribute {
-    static _TYPE_ = 'Attribute';
+import {Serializable} from "../utils.js";
 
-    constructor(id, name, defaultValue, setting = {}) {
+export class Attribute extends Serializable {
+
+    constructor({id, name, defaultValue = null, option = {}}) {
+        super();
         this.id = id;
         this.name = name;
         this.defaultValue = defaultValue;
-        this.setting = setting;
+        this.option = option;
     }
 
     isValid(value) {
@@ -22,12 +23,13 @@ export class Attribute {
     }
 }
 
+Serializable.registerClass(Attribute);
+
 // 新增子类，表示属性的值只能在一个集合里筛选
 export class EnumAttribute extends Attribute {
-    static _TYPE_ = 'EnumAttribute';
 
-    constructor(id, name, defaultValue, allowedValues, setting = {}) {
-        super(id, name, defaultValue, setting);
+    constructor({id, name, defaultValue, allowedValues, option = {}}) {
+        super({id, name, defaultValue, option});
         this.allowedValues = allowedValues;
     }
 
@@ -36,12 +38,13 @@ export class EnumAttribute extends Attribute {
     }
 }
 
+Serializable.registerClass(EnumAttribute);
+
 // 新增子类，表示支持映射的属性
 export class MappedAttribute extends EnumAttribute {
-    static _TYPE_ = 'MappedAttribute';
 
-    constructor(id, name, defaultValue, mapping, setting = {}) {
-        super(id, name, defaultValue, Object.keys(mapping), setting);
+    constructor({id, name, defaultValue, mapping, option = {}}) {
+        super({id, name, defaultValue, allowedValues: Object.keys(mapping), option});
 
         if (!Object.keys(mapping).includes(defaultValue)) {
             throw new Error(`Default value ${defaultValue} is not in the allowed mapping.`);
@@ -55,17 +58,19 @@ export class MappedAttribute extends EnumAttribute {
     }
 }
 
+Serializable.registerClass(MappedAttribute);
+
 // 增子类，表示支持样式的属性
 export class StyleAttribute extends MappedAttribute {
-    static _TYPE_ = 'StyleAttribute';
 
     getClassName(value) {
         return this.getMappedValue(value);
     }
 }
 
+Serializable.registerClass(StyleAttribute);
+
 export class ColorAttribute extends StyleAttribute {
-    static _TYPE_ = 'ColorAttribute';
 
     getClassName(value) {
         const className = super.getClassName(value);
@@ -76,8 +81,9 @@ export class ColorAttribute extends StyleAttribute {
     }
 }
 
+Serializable.registerClass(ColorAttribute);
+
 export class BackgroundAttribute extends StyleAttribute {
-    static _TYPE_ = 'ColorAttribute';
 
     getClassName(value) {
         const className = super.getClassName(value);
@@ -88,8 +94,10 @@ export class BackgroundAttribute extends StyleAttribute {
     }
 }
 
+Serializable.registerClass(BackgroundAttribute);
+
 export class LayoutStyleAttribute extends StyleAttribute {
-    static _TYPE_ = 'LayoutStyleAttribute';
+
     static mapping = {
         xLeftTop: {
             direction: "x",
@@ -184,8 +192,8 @@ export class LayoutStyleAttribute extends StyleAttribute {
 
     }
 
-    constructor(id, name, defaultValue) {
-        super(id, name, defaultValue, LayoutStyleAttribute.mapping);
+    constructor({id, name, defaultValue}) {
+        super({id, name, defaultValue, mapping: LayoutStyleAttribute.mapping});
     }
 
     getClassName(value) {
@@ -237,3 +245,5 @@ export class LayoutStyleAttribute extends StyleAttribute {
         return classNames.join(" ");
     }
 }
+
+Serializable.registerClass(LayoutStyleAttribute)

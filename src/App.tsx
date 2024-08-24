@@ -1,6 +1,7 @@
 import CountBtn from '@/components/CountBtn';
 import ReactSVG from '@/assets/react.svg';
 import { Badge } from '@/components/ui/badge';
+import Hello from '@/components/Hello.jsx';
 
 function App() {
   return (
@@ -13,7 +14,9 @@ function App() {
         </div>
         <a href="https://ui.shadcn.com" rel="noopener noreferrer nofollow" target="_blank">
           <Badge variant="outline">shadcn/ui</Badge>
+
         </a>
+        <Hello />
         <CountBtn />
       </div>
     </main>

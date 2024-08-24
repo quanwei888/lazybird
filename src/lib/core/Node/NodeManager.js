@@ -47,7 +47,7 @@ export class NodeManager {
         node.parentId = parentId;
         const parentNode = this.getNode(parentId);
         // 将新节点插入到父节点的子节点列表中的指定位置
-        //console.log(`Inserting  [${nodeId}] into [${position}] of [${parentNode.id}]`, this.nodes);
+        console.log(`Inserting  [${nodeId}] into [${position}] of [${parentNode.id}]`, this.nodes);
         this.insertAtPosition(parentNode.children, node.id, position);
     }
 

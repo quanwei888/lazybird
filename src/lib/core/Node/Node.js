@@ -1,16 +1,18 @@
 import {NodeTypeManager} from './NodeTypeManager.js';
+import {Serializable} from "../utils.js";
 
 // 节点，包含实际的属性值
-export class Node {
-    static _TYPE_ = 'Node';
-
-    constructor(id, nodeTypeId) {
+export class Node extends Serializable {
+    constructor({id, nodeTypeId, parentId = null, attributes = {}, children = [], option = {}} = {}) {
+        super();
         this.id = id;
         this.nodeTypeId = nodeTypeId;
-        this.parentId = null;
-        this.attributes = {};
-        this.children = []; // children now only store ids
+        this.parentId = parentId;
+        this.attributes = attributes;
+        this.children = children;
+        this.option = option;
     }
+
     direction() {
         return "vertical";
     }
@@ -57,10 +59,16 @@ export class Node {
     }
 }
 
+Serializable.registerClass(Node);
+
 export class ComponentNode extends Node {
-    static _TYPE_ = 'ComponentNode';
+
 }
 
+Serializable.registerClass(ComponentNode);
+
 export class SlotNode extends Node {
-    static _TYPE_ = 'SlotNode';
+
 }
+
+Serializable.registerClass(SlotNode);

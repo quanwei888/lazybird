@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {Node, NodeTypeManager, NodeType} from '../Node/index.js';
+import {Node, NodeTypeManager, NodeType, NodeManager} from '../Node/index.js';
 import {AttributeManager, Attribute} from '../Attribute/index.js';
 import sinon from 'sinon';
 
@@ -14,6 +14,7 @@ describe('NodeType', () => {
     });
     beforeEach(() => {
         NodeTypeManager.nodeTypes.clear();
+        NodeManager.nodes.clear();
     });
 
     after(() => {
@@ -21,29 +22,45 @@ describe('NodeType', () => {
     });
 
     it('should create a node with default values', () => {
-        const nodeType = new NodeType(1, 'TestNodeType', ['attr1', 'attr2']);
+        const nodeType = new NodeType({
+            id: 1,
+            name: 'TestNodeType',
+            attributeIds: ['attr1', 'attr2']
+        });
         NodeTypeManager.addNodeType(nodeType);
         const node = nodeType.createNode();
 
-        expect(node.attributes['attr1']).to.equal('default_attr1');
-        expect(node.attributes['attr2']).to.equal('default_attr2');
+        expect(node.getAttribute('attr1')).to.equal('default_attr1');
+        expect(node.getAttribute('attr2')).to.equal('default_attr2');
     });
 
     it('should update node with default values', () => {
-        const nodeType = new NodeType(1, 'TestNodeType', ['attr1']);
+        const nodeType = new NodeType({
+            id: 1,
+            name: 'TestNodeType',
+            attributeIds: ['attr1']
+        });
         NodeTypeManager.addNodeType(nodeType);
         const node = new Node(1, 1);
         nodeType.updateNode(node);
 
-        expect(node.attributes['attr1']).to.equal('default_attr1');
+        expect(node.getAttribute('attr1')).to.equal('default_attr1');
     });
 
     it('should clone default children', () => {
-        const childNodeType = new NodeType(1, 'TestNodeType', ['attr1']);
+        const childNodeType = new NodeType({
+            id: 1,
+            name: 'TestNodeType',
+            attributeIds: ['attr1']
+        });
         NodeTypeManager.addNodeType(childNodeType);
         const childNode = childNodeType.createNode();
 
-        const nodeType = new NodeType(2, 'TestNodeType', [], {}, [childNode.id]);
+        const nodeType = new NodeType({
+            id: 2,
+            name: 'TestNodeType',
+            defaultChildren: [childNode.id]
+        });
         NodeTypeManager.addNodeType(nodeType);
         const clonedChildren = nodeType.cloneDefaultChildren();
 
@@ -52,41 +69,50 @@ describe('NodeType', () => {
     });
 
     it('should set and get default values', () => {
-        const nodeType = new NodeType(1, 'TestNodeType', ['attr1']);
+        const nodeType = new NodeType({
+            id: 1,
+            name: 'TestNodeType',
+            attributeIds: ['attr1']
+        });
         NodeTypeManager.addNodeType(nodeType);
         nodeType.setDefaultValues({attr1: 'new_default'});
 
-        expect(nodeType.getDefaultValues()['attr1']).to.equal('new_default');
+        expect(nodeType.getDefaultValues().attr1).to.equal('new_default');
     });
 
     it('should set and get default children', () => {
         const childNode = new Node(2, 1);
-        const nodeType = new NodeType(1, 'TestNodeType', [], {}, [childNode]);
+        const nodeType = new NodeType({
+            id: 1,
+            name: 'TestNodeType',
+            defaultChildren: [childNode]
+        });
         NodeTypeManager.addNodeType(nodeType);
         nodeType.setDefaultChildren([childNode]);
 
         expect(nodeType.getDefaultChildren()).to.have.lengthOf(1);
         expect(nodeType.getDefaultChildren()[0].id).to.equal(childNode.id);
     });
+
     it('默认属性与 Attribute 不一样', () => {
         AttributeManager.addAttribute(new Attribute("text", "Text", "Text", {
             editMode: "text"
         }));
-        NodeTypeManager.addNodeType(new NodeType(
-            "Label",
-            'Label',
-            ["text"],
-            {
+        NodeTypeManager.addNodeType(new NodeType({
+            id: "Label",
+            name: 'Label',
+            attributeIds: ["text"],
+            defaultValues: {
                 text: "Label"
             },
-            [],
-            {
+            option: {
                 canDrop: false,
                 allowedEditAttribute: ["text", "color", "padding"],
-            }));
+            }
+        }));
 
         const node = NodeTypeManager.getNodeType("Label").createNode();
 
-        expect(node.attributes.text).to.equal("Label");
+        expect(node.getAttribute('text')).to.equal("Label");
     });
 });

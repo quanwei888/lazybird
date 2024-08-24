@@ -3,29 +3,15 @@ import {AttributeManager} from "../Attribute/index.js";
 import {ComponentNode, SlotNode, Node} from "./Node.js";
 import {NodeTypeManager} from "./NodeTypeManager.js";
 import {NodeManager} from "./NodeManager.js";
-
-function areObjectsEqualExcludingField(obj1, obj2, excludeField) {
-    const keys1 = Object.keys(obj1).filter(key => key !== excludeField);
-    const keys2 = Object.keys(obj2).filter(key => key !== excludeField);
-
-    if (keys1.length !== keys2.length) {
-        return false;
-    }
-
-    return keys1.every(key => {
-        if (typeof obj1[key] === 'object' && obj1[key] !== null && typeof obj2[key] === 'object' && obj2[key] !== null) {
-            return areObjectsEqualExcludingField(obj1[key], obj2[key], excludeField);
-        }
-        return obj1[key] === obj2[key];
-    });
-}
+import {Serializable} from "../utils.js";
 
 
-export class NodeType {
-    static _TYPE_ = 'NodeType';
+export class NodeType extends Serializable {
+
     static ID = 0
 
-    constructor(id, name, attributeIds = [], defaultValues = {}, defaultChildren = [], option = {}) {
+    constructor({id, name, attributeIds = [], defaultValues = {}, defaultChildren = [], option = {}}) {
+        super();
         this.id = id;
         this.name = name;
         this.option = option;
@@ -108,7 +94,7 @@ export class NodeType {
     }
 
     newNode(id, parentId) {
-        const node = new Node(id, this.id, parentId);
+        const node = new Node({id: id, nodeTypeId: this.id, parentId: parentId});
         NodeManager.addNode(node);
         return node;
     }
@@ -131,18 +117,24 @@ export class NodeType {
     }
 }
 
+Serializable.registerClass(NodeType);
+
 export class ComponentNodeType extends NodeType {
-    static _TYPE_ = 'ComponentNodeType';
+
 
     newNode(id, nodeTypeId, parentId) {
-        return new ComponentNode(id, this.id, parentId);
+        return new ComponentNode({id: id, nodeTypeId: this.id, parentId: parentId});
     }
 }
+
+Serializable.registerClass(ComponentNodeType);
 
 export class SlotNodeType extends NodeType {
-    static _TYPE_ = 'SlotNodeType';
+
 
     newNode(id, nodeTypeId, parentId) {
-        return new SlotNode(id, this.id, parentId);
+        return new SlotNode({id: id, nodeTypeId: this.id, parentId: parentId});
     }
 }
+
+Serializable.registerClass(SlotNodeType);

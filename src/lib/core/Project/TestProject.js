@@ -13,88 +13,106 @@ const COLOR_MAPPING = {
     None: "",
     "Brand 50": "brand-50",
     "Brand 100": "brand-100",
-    "Brand 200": "brand-200",
-    "Brand 300": "brand-300",
-    "Brand 400": "brand-400",
-    "Brand 500": "brand-500",
     "Brand 600": "brand-600",
-    "Brand 800": "brand-800",
-    "Brand 900": "brand-900",
 }
 // 添加属性
-AttributeManager.addAttribute(new StyleAttribute("spacing", "Spacing", "None", {
-    None: "",
-    Xs: "gap-1",
-    S: "gap-2",
-    M: "gap-4",
-    L: "gap-6",
-    Fill: "justify-between",
+AttributeManager.addAttribute(new StyleAttribute({
+    id: "spacing",
+    name: "Spacing",
+    defaultValue: "None",
+    mapping: {
+        None: "",
+        Xs: "gap-1",
+        S: "gap-2",
+        M: "gap-4",
+        L: "gap-6",
+        Fill: "justify-between",
+    },
+    option: {
+        editMode: "tab"
+    }
 }));
-AttributeManager.addAttribute(new Attribute("text", "Text", "Text", {
-    editMode: "text"
+AttributeManager.addAttribute(new Attribute({
+    id: "text",
+    name: "Text",
+    defaultValue: "Text",
+    option: {
+        editMode: "text"
+    }
 }));
-AttributeManager.addAttribute(new StyleAttribute(
-    "padding",
-    "Padding",
-    "Xs",
-    {
+AttributeManager.addAttribute(new StyleAttribute({
+    id: "padding",
+    name: "Padding",
+    defaultValue: "Xs",
+    mapping: {
         None: "p-0",
         Xs: "p-1",
         S: "p-2",
         M: "p-4",
         L: "p-6",
     },
-    {
+    option: {
         editMode: "tab"
-    }));
-
-AttributeManager.addAttribute(new BackgroundAttribute(
-    "background",
-    "Background",
-    "None",
-    COLOR_MAPPING,
-    {
-        editMode: "select"
-    }));
-
-AttributeManager.addAttribute(new ColorAttribute(
-    "color",
-    "Color",
-    "None",
-    COLOR_MAPPING,
-    {
-        editMode: "select"
-    }));
-
-AttributeManager.addAttribute(new LayoutStyleAttribute("layout", "Layout", "xLeftTop"));
-
-// 添加NodeType
-NodeTypeManager.addNodeType(new NodeType("Page", 'Stack', ["background"], {
-    background: "red",
+    }
 }));
 
-NodeTypeManager.addNodeType(new NodeType(
-    "Stack",
-    'Stack',
-    ["spacing", "padding", "color", "background"],
-    {},
-    [],
-    {
-        allowedEditAttribute: ["background", "color", "padding"],
-    }));
+AttributeManager.addAttribute(new BackgroundAttribute({
+    id: "background",
+    name: "Background",
+    defaultValue: "None",
+    mapping: COLOR_MAPPING,
+    option: {
+        editMode: "select"
+    }
+}));
 
-NodeTypeManager.addNodeType(new NodeType(
-    "Label",
-    'Label',
-    ["color", "padding", "text"],
-    {
+AttributeManager.addAttribute(new ColorAttribute({
+    id: "color",
+    name: "Color",
+    defaultValue: "None",
+    mapping: COLOR_MAPPING,
+    option: {
+        editMode: "select"
+    }
+}));
+
+AttributeManager.addAttribute(new LayoutStyleAttribute({
+    id: "layout",
+    name: "Layout",
+    defaultValue: "xLeftTop"
+}));
+
+// 添加NodeType
+NodeTypeManager.addNodeType(new NodeType({
+    id: "Page",
+    name: 'Stack',
+    attributeIds: ["background"],
+    defaultValues: {
+        background: "red",
+    }
+}));
+
+NodeTypeManager.addNodeType(new NodeType({
+    id: "Stack",
+    name: 'Stack',
+    attributeIds: ["spacing", "padding", "color", "background"],
+    option: {
+        allowedEditAttribute: ["background", "color", "padding"],
+    }
+}));
+
+NodeTypeManager.addNodeType(new NodeType({
+    id: "Label",
+    name: 'Label',
+    attributeIds: ["color", "padding", "text"],
+    defaultValues: {
         text: "Label"
     },
-    [],
-    {
+    option: {
         canDrop: false,
         allowedEditAttribute: ["text", "color", "padding"],
-    }));
+    }
+}));
 
 export const testProject = new Project();
 export const loadProject = () => {
