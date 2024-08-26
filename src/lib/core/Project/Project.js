@@ -7,12 +7,7 @@ export class Project {
         this.currentPage = null;
         this.currentComponent = null;
         this.selectedId = null;
-        this.draggingId = null;
-        this.currentDrop = null;
-        /*{
-            id: null,
-            index: null,
-        }
-         */
+        this.currentDrop = null;//{ id: null, index: null}
+        this.currentDrag = null;//{ id: null, width: null,height:null}
     }
 }

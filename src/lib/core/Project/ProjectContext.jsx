@@ -30,6 +30,10 @@ export const ProjectProvider = ({children}) => {
                 this.reload();
             }
         },
+        setCurrentDrag(drag) {
+            project.currentDrag = drag;
+            this.reload();
+        },
         setCurrentPageId(id) {
             if (id !== project.currentPage.id) {
                 project.currentPage = NodeManager.getNode(id);
@@ -40,12 +44,6 @@ export const ProjectProvider = ({children}) => {
         setSelectedId(id) {
             if (id !== project.selectedId) {
                 project.selectedId = id;
-                this.reload();
-            }
-        },
-        setDraggingId(id) {
-            if (id !== project.draggingId) {
-                project.draggingId = id;
                 this.reload();
             }
         },

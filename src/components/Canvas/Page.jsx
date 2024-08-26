@@ -29,6 +29,7 @@ export const Page = ({id}) => {
         console.log(event)
         if (event.key === 'Backspace' && project.selectedId && project.selectedId != project.currentPage.id) {
             // 删除被选中的节点
+            event.currentTarget.blur();
             NodeManager.removeNode(project.selectedId);
             actions.setSelectedId(null)
         }

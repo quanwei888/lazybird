@@ -10,14 +10,14 @@ import {
 export const title = (value = "this is a title") => new PropsAttribute({
     name: "title",
     value: value,
-    option: { editMode: "text", group: "Property" }
+    option: {editMode: "text", group: "Property"}
 });
 
 export const text = (value = "Hello World") => new PropsAttribute({
-    id:"text",
+    id: "text",
     name: "text",
     value: value,
-    option: { editMode: "text", group: "Property" }
+    option: {editMode: "text", group: "Property"}
 });
 
 const colorMapping = {
@@ -38,7 +38,7 @@ export const color = (value = "None") => new ColorAttribute({
     name: "color",
     value: value,
     mapping: colorMapping,
-    option: { editMode: "color", group: "Color" }
+    option: {editMode: "color", group: "Color"}
 })
 
 export const background = (value = "None") => new BackgroundAttribute({
@@ -46,7 +46,7 @@ export const background = (value = "None") => new BackgroundAttribute({
     name: "background",
     value: value,
     mapping: colorMapping,
-    option: { editMode: "color", group: "Color" }
+    option: {editMode: "color", group: "Color"}
 })
 
 export const padding = (value = "None") => new MapStyleAttribute({
@@ -59,7 +59,7 @@ export const padding = (value = "None") => new MapStyleAttribute({
         "M": "p-4",
         "L": "p-8",
     },
-    option: { editMode: "tab", group: "Style" }
+    option: {editMode: "tab", group: "Style"}
 })
 
 
@@ -73,7 +73,7 @@ export const border = (value = "None") => new MapStyleAttribute({
         "Neutral": "border border-neutral-200",
 
     },
-    option: { editMode: "tab", group: "Style" }
+    option: {editMode: "tab", group: "Style"}
 })
 
 export const width = (value = "Hug") => new MapStyleAttribute({
@@ -84,7 +84,7 @@ export const width = (value = "Hug") => new MapStyleAttribute({
         "Hug": "w-fit",
         "Fill": "w-full",
     },
-    option: { editMode: "tab", group: "Size" }
+    option: {editMode: "tab", group: "Size"}
 })
 
 export const height = (value = "Hug") => new MapStyleAttribute({
@@ -95,7 +95,7 @@ export const height = (value = "Hug") => new MapStyleAttribute({
         "Hug": "h-fit",
         "Fill": "h-full",
     },
-    option: { editMode: "tab", group: "Size" }
+    option: {editMode: "tab", group: "Size"}
 })
 
 export const layout = (
@@ -103,11 +103,11 @@ export const layout = (
         direction: "flex-col",
         position: "justify-start items-start"
     }) => new LayoutAttribute({
-        name: "layout",
-        value: value,
-        mapping: {},
-        option: { editMode: "layout", group: "Style" }
-    })
+    name: "layout",
+    value: value,
+    mapping: {},
+    option: {editMode: "layout", group: "Style"}
+})
 
 export const space = (value = "None") => new MapStyleAttribute({
     id: "space",
@@ -119,7 +119,7 @@ export const space = (value = "None") => new MapStyleAttribute({
         "M": "space-y-4",
         "L": "space-y-8",
     },
-    option: { editMode: "tab", group: "Style" }
+    option: {editMode: "tab", group: "Style"}
 })
 
 export const corner = (value = "None") => new MapStyleAttribute({
@@ -132,7 +132,7 @@ export const corner = (value = "None") => new MapStyleAttribute({
         "M": "rounded-md",
         "L": "rounded-lg",
     },
-    option: { editMode: "tab", group: "Style" }
+    option: {editMode: "tab", group: "Style"}
 })
 
 export const shadow = (value = "None") => new MapStyleAttribute({
@@ -145,5 +145,29 @@ export const shadow = (value = "None") => new MapStyleAttribute({
         "M": "shadow-md",
         "L": "shadow-lg",
     },
-    option: { editMode: "tab", group: "Style" }
+    option: {editMode: "tab", group: "Style"}
+})
+
+export const font = (value = "M") => new MapStyleAttribute({
+    id: "font",
+    name: "font",
+    value: value,
+    mapping: {
+        "XS": "text-sm",
+        "S": "text-sm",
+        "M": "text-md",
+        "L": "text-lg",
+        "XL": "text-xl",
+    },
+    option: {editMode: "tab", group: "Style"}
+})
+export const bold = (value = "Normal") => new MapStyleAttribute({
+    id: "bold",
+    name: "bold",
+    value: value,
+    mapping: {
+        "Normal": "font-normal",
+        "Bold": "font-bold",
+    },
+    option: {editMode: "tab", group: "Style"}
 })

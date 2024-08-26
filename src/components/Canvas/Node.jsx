@@ -8,7 +8,6 @@ import log from 'loglevel';
 
 export const Node = ({node}) => {
     const {project, actions} = useProject();
-    const [currentDraggingItem, setCurrentDraggingItem] = useState(null);
 
     // 使用useDrag钩子来处理拖拽逻辑
     const [{isDragging}, drag, preview] = useDrag({
@@ -16,10 +15,13 @@ export const Node = ({node}) => {
         item: () => {
             console.log('Drag started');
             actions.setSelectedId(node.id);
-            actions.setDraggingId(node.id);
-
             const {width, height} = ref.current.getBoundingClientRect();
             const item = {node, width, height};
+            actions.setCurrentDrag({
+                id: node.id,
+                width: width,
+                height: height,
+            });
             return item;
         },
         canDrag: () => {
@@ -34,7 +36,7 @@ export const Node = ({node}) => {
             } else {
                 console.log('Drag ended without drop');
             }
-            actions.setDraggingId(null);
+            actions.setCurrentDrag(null);
             actions.setCurrentDrop(null);
         },
     });
@@ -102,6 +104,7 @@ export const Node = ({node}) => {
         },
         hover: (item, monitor) => {
             const sourceNode = item.node;
+            let currentDropId = currentDrop.id;
 
             // 如果当前节点是被悬停的节点
             if (isOverCurrent) {
@@ -116,28 +119,22 @@ export const Node = ({node}) => {
                 if (targetNode) {
                     actions.setCurrentDrop({
                         id: targetNode.id,
-                        index: null
+                        index: currentDrop.index,
                     });
+                    currentDropId = targetNode.id;
                 }
             }
 
             // 如果当前悬停的节点是currentDrop的目标节点
-            if (currentDrop.id == node.id) {
+            if (currentDropId == node.id) {
                 // 计算插入位置
                 const pos = calculateInsertIndex(sourceNode, node, monitor);
                 log.info(`[${sourceNode.id}] hover into pos [${pos}]  of [${node.id}]`);
 
-                // 如果计算出的插入位置与currentDrop中的位置不同，更新拖拽项
-                if (pos !== currentDrop.index) {
-                    setCurrentDraggingItem(item);
-                }
                 actions.setCurrentDrop({
                     id: node.id,
                     index: pos
                 });
-            } else {
-                // 如果当前悬停的节点不是currentDrop的目标节点，清空拖拽项
-                setCurrentDraggingItem(null);
             }
         },
         collect: (monitor) => ({
@@ -148,21 +145,22 @@ export const Node = ({node}) => {
 
     log.debug(`[Node][Node.${node.id}]`, project.currentDrop);
     const currentDrop = project.currentDrop ? project.currentDrop : {id: null, index: null};
+    const currentDrag = project.currentRag ? project.currentDrop : {id: null, index: null};
     const ref = useRef(null);
     drag(drop(ref));
 
     // 占位符组件
     const Placeholder = () => {
         const style = {
-            width: currentDraggingItem.width,
-            height: currentDraggingItem.height,
+            width: project.currentDrag.width,
+            height: project.currentDrag.height,
         }
         return (
             <div style={style} className="border border-dotted border-gray-700"></div>
         )
     };
     const SelectedBox = () => (
-        project.draggingId === null && project.selectedId === node.id && (
+        project.currentDrag === null && project.selectedId === node.id && (
             <div
                 className="absolute z-10 pointer-events-none border-2 top-0 right-0 bottom-0 left-0 border-blue-700"></div>
         )
@@ -184,9 +182,14 @@ export const Node = ({node}) => {
     if (NodeManager.canEdit(node.id)) {
         classNames.push('can-be-selected', 'can-be-hovered');
     }
+    if (node.id === project.currentDrag?.id) {
+        classNames.push('opacity-20', 'outline-none');
+    }
 
     return (
         <RenderNode node={node} ref={ref} classNames={classNames}>
+            <SelectedBox/>
+            <ParentOfSelectBox/>
             {node.children.map((childId, index) => (
                 <React.Fragment key={childId}>
                     {currentDrop.id == node.id && index === currentDrop.index && <Placeholder/>}
@@ -195,8 +198,6 @@ export const Node = ({node}) => {
             ))}
             {currentDrop.id == node.id && node.children.length === currentDrop.index &&
                 <Placeholder/>}
-            <SelectedBox/>
-            <ParentOfSelectBox/>
         </RenderNode>
     )
 }

@@ -15,10 +15,14 @@ export const DragableBox = ({nodeType}) => {
         item: () => {
             const node = nodeType.createNode();
             console.log('Drag started');
-            actions.setDraggingId(node.id);
 
             const {width, height} = ref.current.getBoundingClientRect();
             const item = {node, width, height};
+            actions.setCurrentDrag({
+                id: node.id,
+                width: width,
+                height: height,
+            });
             return item;
         },
         canDrag: () => true,
@@ -31,7 +35,7 @@ export const DragableBox = ({nodeType}) => {
             } else {
                 console.log('Drag ended without drop');
             }
-            actions.setDraggingId(null);
+            actions.setCurrentDrag(null);
             actions.setCurrentDrop(null);
         },
     }, [project]);

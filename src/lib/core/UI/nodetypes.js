@@ -1,7 +1,7 @@
-import {ComponentNodeType, NodeManager, NodeType, NodeTypeManager} from "../Node/index.js";
-import {ChildrenAttribute} from "../Attribute/index.js";
+import { ComponentNodeType, NodeManager, NodeType, NodeTypeManager } from "../Node/index.js";
+import { ChildrenAttribute } from "../Attribute/index.js";
 import * as ComAttr from "./attributes.js";
-import {space} from "./attributes.js";
+import { space } from "./attributes.js";
 
 
 const StackAttributes = [
@@ -40,6 +40,8 @@ export const Label = new NodeType({
     attributes: [
         ComAttr.width(),
         ComAttr.height(),
+        ComAttr.font(),
+        ComAttr.bold(),
         ComAttr.color(),
         ComAttr.background(),
         ComAttr.text()
@@ -58,6 +60,7 @@ NodeManager.insertNode(Stack.createNode().id, root.id)
 const children = [
     root.id
 ]
+
 export const Component = new ComponentNodeType({
     id: "Component",
     name: 'Component',

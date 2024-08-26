@@ -10,16 +10,7 @@ import log from 'loglevel';
 import {UIStack, UILabel} from "./ui/index.js";
 
 const RenderNode = forwardRef(({children, node, classNames = []}, ref) => {
-    const {project} = useProject();
-    const currentDrop = project.currentDrop || {id: null, index: null};
-
     log.debug(`[Render][RenderNode.${node.id}][${node.nodeTypeId}]`);
-
-
-    // 如果节点正在被拖拽，添加透明度和边框样式
-    if (node.id === project.draggingId) {
-        classNames.push('opacity-20', 'outline-none');
-    }
 
     // 获取节点类型
     const nodeType = NodeTypeManager.getNodeType(node.nodeTypeId);
