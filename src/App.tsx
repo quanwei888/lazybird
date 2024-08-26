@@ -1,11 +1,10 @@
-import Hello from '@/components/Hello.jsx';
 import {DndProvider} from "react-dnd";
 import {HTML5Backend} from "react-dnd-html5-backend";
+// @ts-ignore
 import {ProjectProvider} from "@/lib/core/Project/ProjectContext.jsx"
-import {SideBar} from '@/components/index.js';
+// @ts-ignore
+import {SideBar,Page, PropertyPanel} from '@/components/index.js';
 import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
-import {Page, PropertyPanel} from "@/components/index.js";
-import {Fragment} from "react";
 
 
 const queryClient = new QueryClient()
