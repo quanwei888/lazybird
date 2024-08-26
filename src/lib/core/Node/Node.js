@@ -3,6 +3,14 @@ import {Serializable} from "../utils.js";
 
 // 节点，包含实际的属性值
 export class Node extends Serializable {
+    id;
+    name;
+    nodeTypeId;
+    parentId;
+    attributes;
+    children;
+    option;
+    
     constructor({id, nodeTypeId, name, parentId = null, attributes = {}, children = [], option = {}} = {}) {
         super();
         this.id = id;

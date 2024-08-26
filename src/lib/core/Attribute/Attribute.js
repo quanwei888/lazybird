@@ -2,11 +2,14 @@ import {Serializable} from "../utils.js";
 import {NodeManager, NodeTypeManager} from "../Node/index.js";
 
 export class Attribute extends Serializable {
-    static ID = 0;
+    static ATOM_ID = 0;
+    id;
+    name;
+    value;
 
-    constructor({id, name, value = null, option = {}}) {
+    constructor({id, name, value = null, option = {}} = {}) {
         super();
-        this.id = id ? id : "attr" + Attribute.ID++;
+        this.id = id ? id : "attr" + Attribute.ATOM_ID++;
         this.name = name;
         this.value = value;
         this.option = option;
@@ -42,17 +45,16 @@ export class VariableAttribute extends Attribute {
 Serializable.registerClass(VariableAttribute);
 
 export class StyleAttribute extends Attribute {
-
+    getClassName(value) {
+        return value;
+    }
 }
 
 Serializable.registerClass(StyleAttribute);
 
 export class MapStyleAttribute extends StyleAttribute {
-    constructor({id, name, value, mapping, option = {}}) {
+    constructor({id, name, value, mapping, option = {}} = {}) {
         super({id, name, value, option});
-        if (!Object.keys(mapping).includes(value)) {
-            throw new Error(`Default value ${value} is not in the allowed mapping.`);
-        }
 
         this.mapping = mapping;
     }
@@ -81,6 +83,20 @@ export class LayoutAttribute extends StyleAttribute {
 }
 
 Serializable.registerClass(LayoutAttribute);
+
+export class SizeAttribute extends StyleAttribute {
+    getClassName(value) {
+        const cssPrefix = this.option?.cssPrefix || "w";
+        const className = ["flex"];
+        if (value?.tag === "Hug") return ""
+        if (value?.tag === "Fill") return `${cssPrefix}-full`;
+        return `${cssPrefix}-[${value.size}px]`;
+
+    }
+}
+
+Serializable.registerClass(SizeAttribute);
+
 
 export class ColorAttribute extends MapStyleAttribute {
 

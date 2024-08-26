@@ -3,7 +3,7 @@ import {
     ColorAttribute,
     LayoutAttribute,
     PropsAttribute,
-    MapStyleAttribute
+    MapStyleAttribute, SizeAttribute
 } from "../Attribute/index.js";
 
 
@@ -33,7 +33,7 @@ const colorMapping = {
     "gray-800": "gray-800",
     "gray-900": "gray-900",
 }
-export const color = (value = "None") => new ColorAttribute({
+export const color = (value = "gray-700") => new ColorAttribute({
     id: "color",
     name: "color",
     value: value,
@@ -49,7 +49,7 @@ export const background = (value = "None") => new BackgroundAttribute({
     option: {editMode: "color", group: "Color"}
 })
 
-export const padding = (value = "None") => new MapStyleAttribute({
+export const padding = (value = "S") => new MapStyleAttribute({
     id: "padding",
     name: "padding",
     value: value,
@@ -63,7 +63,7 @@ export const padding = (value = "None") => new MapStyleAttribute({
 })
 
 
-export const border = (value = "None") => new MapStyleAttribute({
+export const border = (value = "Neutral") => new MapStyleAttribute({
     id: "border",
     name: "border",
     value: value,
@@ -76,26 +76,18 @@ export const border = (value = "None") => new MapStyleAttribute({
     option: {editMode: "tab", group: "Style"}
 })
 
-export const width = (value = "Hug") => new MapStyleAttribute({
+export const width = (value = {tag: "Fill", size: "0"}) => new SizeAttribute({
     id: "width",
     name: "width",
     value: value,
-    mapping: {
-        "Hug": "w-fit",
-        "Fill": "w-full",
-    },
-    option: {editMode: "tab", group: "Size"}
+    option: {editMode: "size", cssPrefix: "w", group: "Size"}
 })
 
-export const height = (value = "Hug") => new MapStyleAttribute({
+export const height = (value = {tag: "Hug", size: "0"}) => new SizeAttribute({
     id: "height",
     name: "height",
     value: value,
-    mapping: {
-        "Hug": "h-fit",
-        "Fill": "h-full",
-    },
-    option: {editMode: "tab", group: "Size"}
+    option: {editMode: "size", cssPrefix: "h", group: "Size"}
 })
 
 export const layout = (
@@ -122,7 +114,7 @@ export const space = (value = "None") => new MapStyleAttribute({
     option: {editMode: "tab", group: "Style"}
 })
 
-export const corner = (value = "None") => new MapStyleAttribute({
+export const corner = (value = "M") => new MapStyleAttribute({
     id: "corner",
     name: "corner",
     value: value,

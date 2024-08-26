@@ -1,5 +1,6 @@
 import {Project} from "./Project.js";
-import {Stack,Label, Component,CardExample} from "../UI/index.js";
+import {Stack, Label, Component, CardExample} from "../UI/index.js";
+import {Serializable} from "../utils.js";
 
 import {
     NodeManager, NodeTypeManager,
@@ -32,8 +33,58 @@ NodeManager.insertNode(Label.createNode().id, page.id);
 NodeManager.insertNode(CardExample.createNode().id, page.id);
 testProject.selectedId = "Stack_9";
 
-console.log(NodeManager.canEdit("Component_11"));
+//console.log(NodeManager.canEdit("Component_11"));
 const component = Component.createNode();
-NodeManager.printNodeTree(page.id);
+//NodeManager.printNodeTree(page.id);
 const nodeTypes = NodeTypeManager.getNodeTypes();
-console.log(Object.keys(nodeTypes));
+//console.log(Object.keys(nodeTypes));
+
+
+
+const loadJson = () => {
+    NodeManager.nodes.clear();
+    NodeTypeManager.nodeTypes.clear();
+
+    const json = localStorage.getItem('data');
+    const data = JSON.parse(json);
+
+    for (const nodeTypeObject of data["nodeTypes"]) {
+        const nodeType = Serializable.fromJSON(nodeTypeObject)
+        NodeTypeManager.addNodeType(nodeType);
+    }
+
+    for (const nodeObject of data["nodes"]) {
+        const node = Serializable.fromJSON(nodeObject)
+        NodeManager.addNode(node);
+    }
+
+    const project = new Project();
+
+    for (const [id, node] of NodeManager.getNodes()) {
+        if (node.parentId === null) {
+            project.pages.push(node);
+        }
+    }
+}
+
+const syncJson = () => {
+    const data = {
+        nodeTypes: [],
+        nodes: []
+    }
+    for (const [id, nodeType] of NodeTypeManager.getNodeTypes()) {
+        const nodeTypeJson = nodeType.toJSON()
+        data.nodeTypes.push(nodeTypeJson)
+    }
+
+    for (const [id, node] of NodeManager.getNodes()) {
+        const nodeJson = node.toJSON();
+        data.nodes.push(nodeJson);
+    }
+
+    localStorage.setItem('data', JSON.stringify(data));
+}
+
+//syncJson();
+//loadJson();
+//setInterval(syncJson, 5000);

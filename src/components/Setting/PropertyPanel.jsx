@@ -7,6 +7,7 @@ import {Separator} from "@/components/ui/separator";
 import {TextSetting} from "./TextSetting.jsx";
 import {ColorSelectSetting} from "./ColorSelectSetting.jsx";
 import {LayoutSetting} from "./LayoutSetting.jsx";
+import {SizeSetting} from "./SizeSetting.jsx";
 
 export const PropertyPanel = () => {
     const {project, actions} = useProject();
@@ -68,6 +69,15 @@ export const PropertyPanel = () => {
                                 case "color":
                                     return (
                                         <ColorSelectSetting
+                                            key={attribute.id}
+                                            attribute={attribute}
+                                            onChange={handleChange}
+                                            currentValue={node.getAttribute(attribute.id)}
+                                        />
+                                    )
+                                case "size":
+                                    return (
+                                        <SizeSetting
                                             key={attribute.id}
                                             attribute={attribute}
                                             onChange={handleChange}

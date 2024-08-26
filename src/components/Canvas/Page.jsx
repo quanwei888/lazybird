@@ -51,8 +51,8 @@ export const Page = ({id}) => {
     log.debug(`[Render][Page}`);
 
     return (
-        <div className="w-full h-full px-12 py-4 rounded" id="_page_" tabIndex="0">
-            <div className="w-full h-full bg-white">
+        <div className="max-w-full h-full px-12 py-4 rounded" id="_page_" tabIndex="0">
+            <div className="max-w-[768px] h-full bg-white">
                 <CustomDragLayer/>
                 {project?.currentPage && <Node node={project.currentPage}/>}
             </div>

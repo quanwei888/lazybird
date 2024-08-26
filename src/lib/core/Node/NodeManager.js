@@ -5,7 +5,9 @@ import {ComponentNode} from "./Node.js";
 export class NodeManager {
     static nodes = new Map();
     static currentId = 0; // Add a static property for ID generation
-
+    static getNodes() {
+        return this.nodes;
+    }
     static addNode(node) {
         if (!this.nodes.has(node.id)) {
             this.nodes.set(node.id, node);

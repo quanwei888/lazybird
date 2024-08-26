@@ -7,17 +7,17 @@ import {Serializable} from "../utils.js";
 
 
 export class NodeType extends Serializable {
+    static ATOM_ID = 0
+    id;
+    name;
+    option;
+    attributes;
 
-    static ID = 0
-
-    constructor({id, name, attributes = [], option = {}}) {
+    constructor({id, name, attributes = [], option = {}} = {}) {
         super();
         this.id = id;
         this.name = name;
         this.option = option;
-        this.option.canDrag = option.canDrag ?? true;
-        this.option.canDrop = option.canDrop ?? true;
-        this.option.allowedEditAttribute = option.allowedEditAttribute ?? [];
         this.attributes = attributes;
     }
 
@@ -30,7 +30,7 @@ export class NodeType extends Serializable {
     }
 
     generateUniqueId() {
-        return `${this.id}_${NodeType.ID++}`;
+        return `${this.id}_${NodeType.ATOM_ID++}`;
     }
 
 

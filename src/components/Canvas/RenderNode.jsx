@@ -14,6 +14,7 @@ const RenderNode = forwardRef(({children, node, classNames = []}, ref) => {
 
     // 获取节点类型
     const nodeType = NodeTypeManager.getNodeType(node.nodeTypeId);
+    classNames = [...classNames];
 
     // 遍历节点的属性，添加样式类名
     Object.keys(node.attributes).forEach(attrKey => {

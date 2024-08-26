@@ -17,7 +17,20 @@ export class Serializable {
         if (!cls) {
             throw new Error(`Class ${className} not found`);
         }
-        return plainToInstance(cls, plainObject);
+
+        const instance = plainToInstance(cls, plainObject);
+
+        for (const key of Object.keys(instance)) {
+            if (plainObject[key] && plainObject[key]._CLASS_) {
+                instance[key] = Serializable.fromJSON(plainObject[key]);
+            }
+        }
+
+        return instance;
+    }
+
+    static registerClass(cls) {
+        Serializable.classMap[cls.name] = cls;
     }
 
     static registerClass(cls) {

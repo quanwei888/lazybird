@@ -185,11 +185,9 @@ export const Node = ({node}) => {
     if (node.id === project.currentDrag?.id) {
         classNames.push('opacity-20', 'outline-none');
     }
-
     return (
         <RenderNode node={node} ref={ref} classNames={classNames}>
             <SelectedBox/>
-            <ParentOfSelectBox/>
             {node.children.map((childId, index) => (
                 <React.Fragment key={childId}>
                     {currentDrop.id == node.id && index === currentDrop.index && <Placeholder/>}
