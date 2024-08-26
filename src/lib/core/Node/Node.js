@@ -3,9 +3,10 @@ import {Serializable} from "../utils.js";
 
 // 节点，包含实际的属性值
 export class Node extends Serializable {
-    constructor({id, nodeTypeId, parentId = null, attributes = {}, children = [], option = {}} = {}) {
+    constructor({id, nodeTypeId, name, parentId = null, attributes = {}, children = [], option = {}} = {}) {
         super();
         this.id = id;
+        this.name = name;
         this.nodeTypeId = nodeTypeId;
         this.parentId = parentId;
         this.attributes = attributes;
@@ -15,6 +16,16 @@ export class Node extends Serializable {
 
     direction() {
         return "vertical";
+    }
+
+    canDrop() {
+        const nodeType = NodeTypeManager.getNodeType(this.nodeTypeId);
+        return nodeType && nodeType.option.canDrop;
+    }
+
+    canDrag() {
+        const nodeType = NodeTypeManager.getNodeType(this.nodeTypeId);
+        return nodeType && nodeType.option.canDrag;
     }
 
     setAttribute(attributeId, value) {

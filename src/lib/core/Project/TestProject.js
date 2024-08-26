@@ -1,12 +1,8 @@
 import {Project} from "./Project.js";
-import {UIStack, UIPage, UIComponent} from "../UI/index.js";
+import {Stack,Label, Component,CardExample} from "../UI/index.js";
 
 import {
-    NodeManager,
-    NodeTypeManager,
-    AttributeManager,
-    StyleAttribute,
-    BackgroundAttribute, ColorAttribute, Attribute
+    NodeManager, NodeTypeManager,
 } from "../index.js";
 
 
@@ -19,24 +15,25 @@ export const loadProject = () => {
     });
 };
 
-const page = UIPage.createNode();
+const page = Stack.createNode();
 testProject.pages.push(page);
 testProject.currentPage = page;
+testProject.pages.push(Stack.createNode());
+testProject.pages.push(Stack.createNode());
 
-NodeManager.insertNode(UIStack.createNode().id, page.id);
-NodeManager.insertNode(UIStack.createNode().id, page.id);
+NodeManager.insertNode(Stack.createNode().id, page.id);
+NodeManager.insertNode(Stack.createNode().id, page.id);
+NodeManager.insertNode(Label.createNode().id, page.id);
+NodeManager.insertNode(CardExample.createNode().id, page.id);
+NodeManager.insertNode(Component.createNode().id, page.id);
+NodeManager.insertNode(Component.createNode().id, page.id);
+NodeManager.insertNode(Label.createNode().id, page.id);
+NodeManager.insertNode(Label.createNode().id, page.id);
+NodeManager.insertNode(CardExample.createNode().id, page.id);
+testProject.selectedId = "Stack_9";
 
-const component = UIComponent.createNode();
-console.log(component);
-NodeManager.insertNode(component.id, page.id);
+console.log(NodeManager.canEdit("Component_11"));
+const component = Component.createNode();
 NodeManager.printNodeTree(page.id);
-/*
-const cardType = NodeTypeManager.getNodeType("UICard")
-const card = cardType.createNode();
-NodeManager.insertNode(cardType.createNode({card_title: "Card 1"}).id, page.id);
-NodeManager.insertNode(cardType.createNode({card_title: "Card 2"}).id, page.id);
-
-//const child2 = NodeTypeManager.getNodeType("Label").createNode();
-NodeManager.insertNode(NodeTypeManager.getNodeType("Stack").createNode().id, page.id);
-NodeManager.insertNode(NodeTypeManager.getNodeType("Component").createNode().id, page.id);
-*/
+const nodeTypes = NodeTypeManager.getNodeTypes();
+console.log(Object.keys(nodeTypes));

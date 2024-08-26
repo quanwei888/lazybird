@@ -7,7 +7,6 @@ export class Project {
         this.currentPage = null;
         this.currentComponent = null;
         this.selectedId = null;
-        this.overId = null;
         this.draggingId = null;
         this.currentDrop = null;
         /*{

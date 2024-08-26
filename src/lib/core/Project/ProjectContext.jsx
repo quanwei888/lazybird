@@ -3,7 +3,6 @@ import {useQuery} from "@tanstack/react-query";
 import {loadProject} from "./TestProject.js";
 import {NodeManager} from "../Node/index.js";
 import {Project} from "./Project.js";
-import page from "@/lib/core/UI/Page.js";
 import _ from "lodash";
 
 // 定义 Context
@@ -25,16 +24,16 @@ export const ProjectProvider = ({children}) => {
 
     const actions = {
         setCurrentDrop(drop) {
-            //console.log('setCurrentDrop', drop);
-            if (!_.isEqual(drop, page.curentDrop)) {
-                console.log('555,setCurrentDrop', page.curentDrop, drop);
-                page.curentDrop = drop;
+            if (!_.isEqual(drop, project.currentDrop)) {
+                //console.log('555,setCurrentDrop OK', drop.id);
+                project.currentDrop = drop;
                 this.reload();
             }
         },
-        setCurentPage(page) {
-            if (page === project.currentPage) {
-                project.currentPage = page;
+        setCurrentPageId(id) {
+            if (id !== project.currentPage.id) {
+                project.currentPage = NodeManager.getNode(id);
+                project.selectedId = null;
                 this.reload();
             }
         },
@@ -56,19 +55,13 @@ export const ProjectProvider = ({children}) => {
                 ...currentPageNode,
             };
 
-            const updatedProject = new Project(project.id, project.name);
-            updatedProject.pages = project.pages;
-            updatedProject.components = project.components;
-            updatedProject.currentPage = currentPageNode;
-            updatedProject.currentComponent = project.currentComponent;
-            updatedProject.selectedId = project.selectedId;
-            updatedProject.overId = project.overId;
-            updatedProject.draggingId = project.draggingId;
-            updatedProject.nodes = Object.keys(NodeManager.nodes).length;
-            updatedProject.currentDrop = page.curentDrop;
-
-
-            setProject(updatedProject);
+            const newProject = new Project(project.id, project.name);
+            for (const key in project) {
+                if (project.hasOwnProperty(key)) {
+                    newProject[key] = project[key];
+                }
+            }
+            setProject(newProject);
         },
     };
 

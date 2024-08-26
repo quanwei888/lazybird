@@ -23,7 +23,7 @@ export const Node = ({node}) => {
             return item;
         },
         canDrag: () => {
-            return node.option.canDrag && NodeManager.canEdit(node.id);
+            return node.canDrag() && NodeManager.canEdit(node.id);
         },
         collect: (monitor) => ({
             isDragging: monitor.isDragging(),
@@ -46,7 +46,7 @@ export const Node = ({node}) => {
 
     // 判断是否可以放置
     const canDrop = (sourceNode, targetNode) => {
-        return node.option.canDrop && NodeManager.canEdit(node.id) && !NodeManager.isAncestor(sourceNode.id, targetNode.id);
+        return node.canDrop() && NodeManager.canEdit(node.id) && !NodeManager.isAncestor(sourceNode.id, targetNode.id);
     };
 
     // 计算插入索引
@@ -91,9 +91,6 @@ export const Node = ({node}) => {
         canDrop: (item) => canDrop(item.node, node),
         drop: (item, monitor) => {
             const sourceNode = item.node;
-            if (!canDrop(item)) {
-                return;
-            }
             if (currentDrop.id == node.id) {
                 const pos = calculateInsertIndex(sourceNode, node, monitor)
                 log.info(`[${sourceNode.id}] drop into pos [${pos}]  of [${node.id}]`);
@@ -117,9 +114,10 @@ export const Node = ({node}) => {
 
                 // 如果找到了可以放置的目标节点，设置currentDrop的id为目标节点的id
                 if (targetNode) {
-                    currentDrop.id = targetNode.id;
-                    currentDrop.index = null;
-                    actions.setCurrentDrop(currentDrop);
+                    actions.setCurrentDrop({
+                        id: targetNode.id,
+                        index: null
+                    });
                 }
             }
 
@@ -127,15 +125,16 @@ export const Node = ({node}) => {
             if (currentDrop.id == node.id) {
                 // 计算插入位置
                 const pos = calculateInsertIndex(sourceNode, node, monitor);
+                log.info(`[${sourceNode.id}] hover into pos [${pos}]  of [${node.id}]`);
 
                 // 如果计算出的插入位置与currentDrop中的位置不同，更新拖拽项
                 if (pos !== currentDrop.index) {
                     setCurrentDraggingItem(item);
                 }
-                // 更新currentDrop的id和index
-                currentDrop.id = node.id;
-                currentDrop.index = pos;
-                actions.setCurrentDrop(currentDrop);
+                actions.setCurrentDrop({
+                    id: node.id,
+                    index: pos
+                });
             } else {
                 // 如果当前悬停的节点不是currentDrop的目标节点，清空拖拽项
                 setCurrentDraggingItem(null);
@@ -162,17 +161,42 @@ export const Node = ({node}) => {
             <div style={style} className="border border-dotted border-gray-700"></div>
         )
     };
+    const SelectedBox = () => (
+        project.draggingId === null && project.selectedId === node.id && (
+            <div
+                className="absolute z-10 pointer-events-none border-2 top-0 right-0 bottom-0 left-0 border-blue-700"></div>
+        )
+    );
+    // 父节点选中框组件
+    const ParentOfSelectBox = () => {
+        const selectedNode = NodeManager.getNode(project.selectedId);
+        const parentOfSelectedNode = NodeManager.getNode(selectedNode?.parentId);
+        return (
+            parentOfSelectedNode && parentOfSelectedNode.id === node.id && (
+                <div
+                    className="absolute pointer-events-none border border-dotted top-0 right-0 bottom-0 left-0 border-blue-500"></div>
+            )
+        );
+    };
+
+    const classNames = ['relative'];
+    //classNames.push('can-be-selected', 'can-be-hovered');
+    if (NodeManager.canEdit(node.id)) {
+        classNames.push('can-be-selected', 'can-be-hovered');
+    }
 
     return (
-        <RenderNode node={node} ref={ref}>
+        <RenderNode node={node} ref={ref} classNames={classNames}>
             {node.children.map((childId, index) => (
                 <React.Fragment key={childId}>
-                    {currentDraggingItem && currentDrop.id == node.id && index === currentDrop.index && <Placeholder/>}
+                    {currentDrop.id == node.id && index === currentDrop.index && <Placeholder/>}
                     <Node key={childId} node={NodeManager.getNode(childId)}/>
                 </React.Fragment>
             ))}
-            {currentDraggingItem && currentDrop.id == node.id && node.children.length === currentDrop.index &&
+            {currentDrop.id == node.id && node.children.length === currentDrop.index &&
                 <Placeholder/>}
+            <SelectedBox/>
+            <ParentOfSelectBox/>
         </RenderNode>
     )
 }

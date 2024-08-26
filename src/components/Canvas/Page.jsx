@@ -50,15 +50,11 @@ export const Page = ({id}) => {
     log.debug(`[Render][Page}`);
 
     return (
-        <div className="p-8 h-screen w-full flex flex-row overflow-hidden " id="_page_" tabIndex="0">
-            <CustomDragLayer/>
-            <div className="grow">{project?.currentPage && <Node node={project.currentPage}/>}</div>
-
-            <div className="w-64 text-xs overflow-auto">
-                <pre>{JSON.stringify(NodeManager.getNode(project?.selectedId), null, 2)}</pre>
-                <pre>{JSON.stringify(project, null, 2)}</pre>
+        <div className="w-full h-full px-12 py-4 rounded" id="_page_" tabIndex="0">
+            <div className="w-full h-full bg-white">
+                <CustomDragLayer/>
+                {project?.currentPage && <Node node={project.currentPage}/>}
             </div>
-
         </div>
     )
 }

@@ -1,5 +1,5 @@
 import _ from "lodash";
-import {AttributeManager} from "../Attribute/index.js";
+import {Attribute, AttributeManager} from "../Attribute/index.js";
 import {ComponentNode, SlotNode, Node} from "./Node.js";
 import {NodeTypeManager} from "./NodeTypeManager.js";
 import {NodeManager} from "./NodeManager.js";
@@ -37,7 +37,7 @@ export class NodeType extends Serializable {
     createNode(values = {}) {
         const id = this.generateUniqueId(); // Use instance method
         const node = this.newNode(id, this.id);
-        node.option = this.option;
+        //node.option = this.option;
 
         const ignoredIds = ["id", "parentId", "children"];
         this.attributes.forEach(attribute => {
@@ -76,8 +76,8 @@ export class NodeType extends Serializable {
         });
     }
 
-    newNode(id, parentId) {
-        const node = new Node({id: id, nodeTypeId: this.id, parentId: parentId});
+    newNode(id) {
+        const node = new Node({id, nodeTypeId: this.id, name: this.name});
         NodeManager.addNode(node);
         return node;
     }
@@ -86,10 +86,8 @@ export class NodeType extends Serializable {
 Serializable.registerClass(NodeType);
 
 export class ComponentNodeType extends NodeType {
-
-
-    newNode(id, nodeTypeId, parentId) {
-        const node = new ComponentNode({id: id, nodeTypeId: this.id, parentId: parentId});
+    newNode(id) {
+        const node = new ComponentNode({id, nodeTypeId: this.id, name: this.name});
         NodeManager.addNode(node);
         return node;
     }
@@ -98,10 +96,8 @@ export class ComponentNodeType extends NodeType {
 Serializable.registerClass(ComponentNodeType);
 
 export class SlotNodeType extends NodeType {
-
-
-    newNode(id, nodeTypeId, parentId) {
-        const node = new SlotNode({id: id, nodeTypeId: this.id, parentId: parentId});
+    newNode(id) {
+        const node = new SlotNode({id, nodeTypeId: this.id, name: this.name});
         NodeManager.addNode(node);
         return node;
     }

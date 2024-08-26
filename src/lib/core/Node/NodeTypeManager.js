@@ -12,6 +12,10 @@ export class NodeTypeManager {
         }
     }
 
+    static getNodeTypes() {
+        return this.nodeTypes;
+    }
+
     static getNodeType(id) {
         return this.nodeTypes.get(id);
     }

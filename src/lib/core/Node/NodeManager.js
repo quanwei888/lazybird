@@ -1,6 +1,6 @@
 // 节点管理器
 import {NodeTypeManager} from "./NodeTypeManager.js";
-import {ComponentNode} from "@/lib/core/index.js";
+import {ComponentNode} from "./Node.js";
 
 export class NodeManager {
     static nodes = new Map();
@@ -100,12 +100,23 @@ export class NodeManager {
     static canEdit(nodeId) {
         const rootOfNode = this.getRootNode(nodeId);
         const node = this.getNode(nodeId)
-        let fisrtComponentAncestor = this.getNode(node.parentId);
-        while (fisrtComponentAncestor && !(fisrtComponentAncestor instanceof ComponentNode)) {
-            fisrtComponentAncestor = this.getNode(fisrtComponentAncestor.parentId);
+        return this.canEditChildren(node.parentId);
+    }
+
+    static canEditChildren(nodeId) {
+        const node = this.getNode(nodeId)
+
+        if (!node) {
+            // 根节点, 根节点可以编辑子节点
+            return true;
         }
 
-        return (rootOfNode == fisrtComponentAncestor) || fisrtComponentAncestor === null;
+        if (node instanceof ComponentNode) {
+            // 非根节点的组件节点不能编辑子节点
+            return false;
+        }
+
+        return this.canEditChildren(node.parentId);
     }
 
     static printNodeTree(nodeId = null, level = 0) {
