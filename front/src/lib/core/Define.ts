@@ -3,8 +3,9 @@ import {
     ColorAttribute,
     LayoutAttribute,
     PropsAttribute,
-    MapStyleAttribute, SizeAttribute
-} from "../Attribute/index.js";
+    NodeManager,
+    MapStyleAttribute, SizeAttribute, NodeType, NodeTypeManager, ComponentNodeType, ChildrenAttribute
+} from "./index.ts";
 
 
 export const title = (value = "this is a title") => new PropsAttribute({
@@ -97,7 +98,6 @@ export const layout = (
     }) => new LayoutAttribute({
     name: "layout",
     value: value,
-    mapping: {},
     option: {editMode: "layout", group: "Style"}
 })
 
@@ -163,3 +163,88 @@ export const bold = (value = "Normal") => new MapStyleAttribute({
     },
     option: {editMode: "tab", group: "Style"}
 })
+
+const StackAttributes = [
+    layout(),
+    space(),
+    padding(),
+
+    color(),
+    background(),
+
+    width(),
+    height(),
+
+    border(),
+    corner(),
+    shadow(),
+
+]
+
+export const Stack = new NodeType({
+    id: "Stack",
+    name: 'Stack',
+    attributes: StackAttributes,
+    option: {
+        render: "UIStack",
+        canDrop: true,
+        canDrag: true,
+        icon: "LayoutIcon"
+    }
+})
+NodeTypeManager.addNodeType(Stack);
+
+export const Label = new NodeType({
+    id: "Label",
+    name: 'Label',
+    attributes: [
+        font(),
+        bold(),
+        color(),
+        background(),
+        text()
+    ],
+    option: {
+        render: "UILabel",
+        canDrop: false,
+        canDrag: true,
+        icon: "LayoutIcon"
+    }
+})
+NodeTypeManager.addNodeType(Label);
+
+const root = Stack.createNode();
+NodeManager.insertNode(Stack.createNode().id, root.id)
+const children = [
+    root.id
+]
+
+export const Component = new ComponentNodeType({
+    id: "Component",
+    name: 'Component',
+    attributes: [
+        height(),
+        width(),
+        new ChildrenAttribute(children)],
+    option: {
+        render: "UIStack",
+        canDrop: false,
+        canDrag: true,
+    }
+})
+NodeTypeManager.addNodeType(Component);
+
+
+export const CardExample = new NodeType({
+    id: "CardExample",
+    name: 'CardExample',
+    attributes: [
+        ...StackAttributes,
+        new ChildrenAttribute(children)],
+    option: {
+        render: "UIStack",
+        canDrop: true,
+        canDrag: true,
+    }
+})
+NodeTypeManager.addNodeType(CardExample);
