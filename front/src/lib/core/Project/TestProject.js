@@ -1,7 +1,7 @@
 import {Project} from "./Project.js";
 import {Stack, Label, Component, CardExample} from "../UI/index.js";
 import {Serializable} from "../utils.js";
-
+import * as API from '../../../api/api.ts';
 import {
     NodeManager, NodeTypeManager,
 } from "../index.js";
@@ -38,7 +38,6 @@ const component = Component.createNode();
 //NodeManager.printNodeTree(page.id);
 const nodeTypes = NodeTypeManager.getNodeTypes();
 //console.log(Object.keys(nodeTypes));
-
 
 
 const loadJson = () => {
@@ -85,6 +84,25 @@ const syncJson = () => {
     localStorage.setItem('data', JSON.stringify(data));
 }
 
-//syncJson();
-//loadJson();
-//setInterval(syncJson, 5000);
+
+
+
+let id = 1
+const allAttributes = () => {
+    const data = {}
+    for (const [uuid, nodeType] of NodeTypeManager.getNodeTypes()) {
+        const row = nodeType;
+        row.type = row['_CLASS_'];
+        row.uuid = row["id"];
+        row.attribute_ids = []
+
+        for (const attribute of nodeType.attributes) {
+            row.attribute_ids.push(attribute.id);
+        }
+        delete row.attributes;
+        row.id = id++;
+        console.log(JSON.stringify(row,null,2));
+    }
+    return data;
+}
+allAttributes()
