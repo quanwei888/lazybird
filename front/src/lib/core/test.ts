@@ -1,32 +1,26 @@
 import {
-    NodeManager,
+    fetchNodeTypes, fetchProject,
+    NodeManager, NodeType,
     NodeTypeManager,
     Project,
-    PropsAttribute
+    PropsAttribute, syncProject
 } from "./index.ts";
-import * as Api from "@/api/api.ts"
-import * as Def from "./Define.ts"
 
+import 'reflect-metadata';
 
-export const testProject: Project = new Project();
-export const loadProject = (): Promise<Project> => {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            resolve(testProject);
-        }, 100); // 模拟 1 秒的网络延迟
-    });
-};
+const projectId = 1;
+const project = await fetchProject(projectId)
+const nodeTypes = await fetchNodeTypes(projectId)
+console.log(project);
+project.currentPageId = "1_2"
+//await syncProject(project);
 
-const page = Def.Stack.createNode();
-testProject.pages.push(page);
-testProject.currentPage = page;
-testProject.pages.push(Def.Stack.createNode());
-testProject.pages.push(Def.Stack.createNode());
-
-NodeManager.insertNode(Def.Stack.createNode().id, page.id);
-NodeManager.insertNode(Def.Label.createNode().id, page.id);
-NodeManager.insertNode(Def.CardExample.createNode().id, page.id);
-NodeManager.insertNode(Def.Component.createNode().id, page.id);
-NodeManager.insertNode(Def.Label.createNode().id, page.id);
-
-console.log(testProject)
+const componentNodeType = NodeTypeManager.getNodeTypeByName("@Component");
+const pageNodeType = NodeTypeManager.getNodeTypeByName("@Page");
+const a = pageNodeType.createNode();
+const b = componentNodeType.createNode();
+NodeManager.insertNode(NodeTypeManager.getNodeTypeByName("@Stack").createNode().id,a.id);
+console.log(a.children,b.children);
+console.log(pageNodeType.createNode());
+console.log(a.children,b.children);
+//NodeManager.insertNode(Def.Stack.createNode().id, project.currentPageId);

@@ -1,7 +1,7 @@
 import React, {forwardRef, useEffect, useRef, useState} from "react";
 import {useDrag, useDrop, DragSourceMonitor, DropTargetMonitor} from "react-dnd";
 import {getEmptyImage} from "react-dnd-html5-backend";
-import {NodeManager} from "@/lib/core/index.ts";
+import {NodeManager, NodeTypeManager} from "@/lib/core/index.ts";
 import {useProject} from "@/lib/core/ProjectContext";
 import RenderNode from "@/components/Canvas/RenderNode.tsx";
 import log from 'loglevel';
@@ -59,7 +59,7 @@ export const Node: React.FC<NodeProps> = ({node}) => {
 
     // 判断是否可以放置
     const canDrop = (sourceNode: any, targetNode: any) => {
-        return node.canDrop() && NodeManager.canEdit(node.id) && !NodeManager.isAncestor(sourceNode.id, targetNode.id);
+        return targetNode.canDrop() && NodeManager.canEdit(node.id) && !NodeManager.isAncestor(sourceNode.id, targetNode.id);
     };
 
     // 计算插入索引
@@ -123,7 +123,11 @@ export const Node: React.FC<NodeProps> = ({node}) => {
                 let targetNode = node;
                 // 向上遍历父节点，直到找到可以放置的节点或到达根节点
                 while (targetNode && !canDrop(sourceNode, targetNode)) {
-                    targetNode = NodeManager.getNode(targetNode.parentId);
+                    try {
+                        targetNode = NodeManager.getNode(targetNode.parentId);
+                    } catch (e) {
+                        targetNode = undefined;
+                    }
                 }
 
                 // 如果找到了可以放置的目标节点，设置currentDrop的id为目标节点的id
@@ -154,16 +158,17 @@ export const Node: React.FC<NodeProps> = ({node}) => {
         }),
     });
 
-    log.debug(`[Node][Node.${node.id}]`, project?.currentDrop);
-    const currentDrop = project?.currentDrop ? project.currentDrop : {id: null, index: null};
-    const currentDrag = project?.currentDrag ? project.currentDrag : {id: null, index: null};
+    if (!project) return null;
+    log.debug(`[Node][Node.${node.id}]`, project.currentDrop);
+    const currentDrop = project.currentDrop ? project.currentDrop : {id: null, index: null};
+    const currentDrag = project.currentDrag ? project.currentDrag : {id: null, index: null};
     drag(drop(ref));
 
     // 占位符组件
     const Placeholder: React.FC = () => {
         const style = {
-            width: project?.currentDrag.width,
-            height: project?.currentDrag.height,
+            width: project.currentDrag.width,
+            height: project.currentDrag.height,
         };
         return (
             <div style={style} className="border border-dotted border-gray-700"></div>
@@ -171,17 +176,17 @@ export const Node: React.FC<NodeProps> = ({node}) => {
     };
 
     const SelectedBox: React.FC = () => (
-            project?.currentDrag === null && project?.selectedId === node.id && (
+            project.currentDrag === null && project.selectedId === node.id && (
                 <div
                     className="absolute z-10 pointer-events-none border-2 top-0 right-0 bottom-0 left-0 border-blue-700"></div>
             )
         )
-    ;
 
-    // 父节点选中框组件
     const ParentOfSelectBox: React.FC = () => {
+        if (!project.selectedId) return null;
         const selectedNode = NodeManager.getNode(project?.selectedId);
-        const parentOfSelectedNode = NodeManager.getNode(selectedNode?.parentId);
+        if (!selectedNode.parentId) return null;
+        const parentOfSelectedNode = NodeManager.getNode(selectedNode.parentId);
         return (
             parentOfSelectedNode && parentOfSelectedNode.id === node.id && (
                 <div
@@ -194,10 +199,10 @@ export const Node: React.FC<NodeProps> = ({node}) => {
     if (NodeManager.canEdit(node.id)) {
         classNames.push('can-be-selected', 'can-be-hovered');
     }
-    if (node.id === project?.currentDrag?.id) {
+    if (node.id === project.currentDrag?.id) {
         classNames.push('opacity-20', 'outline-none');
     }
-
+console.log(classNames);
     return (
         <RenderNode node={node} ref={ref} classNames={classNames}>
             <SelectedBox/>

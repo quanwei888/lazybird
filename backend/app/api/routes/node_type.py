@@ -3,7 +3,7 @@ from typing import Any, List
 
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy import func
-from sqlmodel import Session, select
+from sqlmodel import Session, select, or_
 
 from app.api.deps import SessionDep, CurrentUser
 from app.models import NodeType, NodeTypeCreate, NodeTypeUpdate, NodeTypePublic, NodeTypesPublic, Message
@@ -11,33 +11,27 @@ from app.models import NodeType, NodeTypeCreate, NodeTypeUpdate, NodeTypePublic,
 router = APIRouter()
 
 
-@router.get("/", response_model=NodeTypesPublic)
+@router.get("/project_node_type/{project_id}", response_model=NodeTypesPublic)
 def read_node_types(
-        session: SessionDep, user: CurrentUser, skip: int = 0, limit: int = 100
-) -> Any:
-    """
-    Retrieve node types.
-    """
-
-    if user.is_superuser:
-        count_statement = select(func.count()).select_from(NodeType)
-        count = session.exec(count_statement).one()
-        statement = select(NodeType).offset(skip).limit(limit)
-        node_types = session.exec(statement).all()
-    else:
-        count_statement = (
-            select(func.count())
-            .select_from(NodeType)
-            .where(NodeType.user_id == user.id)
+        project_id: int, session: SessionDep, user: CurrentUser) -> Any:
+    count_statement = (
+        select(func.count())
+        .select_from(NodeType)
+        .where(NodeType.user_id == user.id)
+        .where(NodeType.project_id == project_id)
+    )
+    count = session.exec(count_statement).one()
+    statement = (
+        select(NodeType)
+        .where(
+            or_(
+                NodeType.user_id == user.id,
+                NodeType.project_id == project_id
+            ),
+            NodeType.is_private == False
         )
-        count = session.exec(count_statement).one()
-        statement = (
-            select(NodeType)
-            .where(NodeType.user_id == user.id)
-            .offset(skip)
-            .limit(limit)
-        )
-        node_types = session.exec(statement).all()
+    )
+    node_types = session.exec(statement).all()
 
     return NodeTypesPublic(data=node_types, count=count)
 
@@ -57,7 +51,7 @@ def read_node_type(session: SessionDep, user: CurrentUser, id: int) -> Any:
 
 @router.post("/", response_model=NodeTypePublic)
 def create_node_type(
-         session: SessionDep, user: CurrentUser, node_type_in: NodeTypeCreate
+        session: SessionDep, user: CurrentUser, node_type_in: NodeTypeCreate
 ) -> Any:
     """
     Create new node type.

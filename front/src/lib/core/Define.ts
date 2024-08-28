@@ -4,8 +4,17 @@ import {
     LayoutAttribute,
     PropsAttribute,
     NodeManager,
-    MapStyleAttribute, SizeAttribute, NodeType, NodeTypeManager, ComponentNodeType, ChildrenAttribute
+    MapStyleAttribute,
+    SizeAttribute,
+    NodeType,
+    NodeTypeManager,
+    ComponentNodeType,
+    ChildrenAttribute,
+    Project,
+    Attribute
 } from "./index.ts";
+import * as Api from "../../api/api.ts";
+import {PlainBase} from "../utils.ts";
 
 
 export const title = (value = "this is a title") => new PropsAttribute({
@@ -15,7 +24,6 @@ export const title = (value = "this is a title") => new PropsAttribute({
 });
 
 export const text = (value = "Hello World") => new PropsAttribute({
-    id: "text",
     name: "text",
     value: value,
     option: {editMode: "text", group: "Property"}
@@ -35,7 +43,6 @@ const colorMapping = {
     "gray-900": "gray-900",
 }
 export const color = (value = "gray-700") => new ColorAttribute({
-    id: "color",
     name: "color",
     value: value,
     mapping: colorMapping,
@@ -43,7 +50,6 @@ export const color = (value = "gray-700") => new ColorAttribute({
 })
 
 export const background = (value = "None") => new BackgroundAttribute({
-    id: "background",
     name: "background",
     value: value,
     mapping: colorMapping,
@@ -51,7 +57,6 @@ export const background = (value = "None") => new BackgroundAttribute({
 })
 
 export const padding = (value = "S") => new MapStyleAttribute({
-    id: "padding",
     name: "padding",
     value: value,
     mapping: {
@@ -65,7 +70,6 @@ export const padding = (value = "S") => new MapStyleAttribute({
 
 
 export const border = (value = "Neutral") => new MapStyleAttribute({
-    id: "border",
     name: "border",
     value: value,
     mapping: {
@@ -78,14 +82,14 @@ export const border = (value = "Neutral") => new MapStyleAttribute({
 })
 
 export const width = (value = {tag: "Fill", size: "0"}) => new SizeAttribute({
-    id: "width",
+
     name: "width",
     value: value,
     option: {editMode: "size", cssPrefix: "w", group: "Size"}
 })
 
 export const height = (value = {tag: "Hug", size: "0"}) => new SizeAttribute({
-    id: "height",
+
     name: "height",
     value: value,
     option: {editMode: "size", cssPrefix: "h", group: "Size"}
@@ -102,7 +106,7 @@ export const layout = (
 })
 
 export const space = (value = "None") => new MapStyleAttribute({
-    id: "space",
+
     name: "space",
     value: value,
     mapping: {
@@ -115,7 +119,7 @@ export const space = (value = "None") => new MapStyleAttribute({
 })
 
 export const corner = (value = "M") => new MapStyleAttribute({
-    id: "corner",
+
     name: "corner",
     value: value,
     mapping: {
@@ -128,7 +132,7 @@ export const corner = (value = "M") => new MapStyleAttribute({
 })
 
 export const shadow = (value = "None") => new MapStyleAttribute({
-    id: "shadow",
+
     name: "shadow",
     value: value,
     mapping: {
@@ -141,7 +145,7 @@ export const shadow = (value = "None") => new MapStyleAttribute({
 })
 
 export const font = (value = "M") => new MapStyleAttribute({
-    id: "font",
+
     name: "font",
     value: value,
     mapping: {
@@ -154,7 +158,7 @@ export const font = (value = "M") => new MapStyleAttribute({
     option: {editMode: "tab", group: "Style"}
 })
 export const bold = (value = "Normal") => new MapStyleAttribute({
-    id: "bold",
+
     name: "bold",
     value: value,
     mapping: {
@@ -164,26 +168,26 @@ export const bold = (value = "Normal") => new MapStyleAttribute({
     option: {editMode: "tab", group: "Style"}
 })
 
-const StackAttributes = [
-    layout(),
-    space(),
-    padding(),
+const StackAttributes = {
+    layout: layout(),
+    space: space(),
+    padding: padding(),
 
-    color(),
-    background(),
+    color: color(),
+    background: background(),
 
-    width(),
-    height(),
+    width: width(),
+    height: height(),
 
-    border(),
-    corner(),
-    shadow(),
+    border: border(),
+    corner: corner(),
+    shadow: shadow(),
 
-]
+}
 
 export const Stack = new NodeType({
-    id: "Stack",
-    name: 'Stack',
+    id: 0,
+    name: '@Stack',
     attributes: StackAttributes,
     option: {
         render: "UIStack",
@@ -192,18 +196,17 @@ export const Stack = new NodeType({
         icon: "LayoutIcon"
     }
 })
-NodeTypeManager.addNodeType(Stack);
 
 export const Label = new NodeType({
-    id: "Label",
-    name: 'Label',
-    attributes: [
-        font(),
-        bold(),
-        color(),
-        background(),
-        text()
-    ],
+    id: 0,
+    name: '@Label',
+    attributes: {
+        font: font(),
+        bold: bold(),
+        color: color(),
+        background: background(),
+        text: text()
+    },
     option: {
         render: "UILabel",
         canDrop: false,
@@ -211,40 +214,46 @@ export const Label = new NodeType({
         icon: "LayoutIcon"
     }
 })
-NodeTypeManager.addNodeType(Label);
 
-const root = Stack.createNode();
-NodeManager.insertNode(Stack.createNode().id, root.id)
-const children = [
-    root.id
-]
-
-export const Component = new ComponentNodeType({
-    id: "Component",
-    name: 'Component',
-    attributes: [
-        height(),
-        width(),
-        new ChildrenAttribute(children)],
-    option: {
-        render: "UIStack",
-        canDrop: false,
-        canDrag: true,
-    }
-})
-NodeTypeManager.addNodeType(Component);
-
-
-export const CardExample = new NodeType({
-    id: "CardExample",
-    name: 'CardExample',
-    attributes: [
+export const Page = new ComponentNodeType({
+    id: 0,
+    name: '@Page',
+    attributes: {
         ...StackAttributes,
-        new ChildrenAttribute(children)],
+        children: new ChildrenAttribute([])
+    },
     option: {
         render: "UIStack",
         canDrop: true,
         canDrag: true,
     }
 })
-NodeTypeManager.addNodeType(CardExample);
+export const Component = new ComponentNodeType({
+    id: 0,
+    name: '@Component',
+    attributes: {
+        ...StackAttributes,
+        children: new ChildrenAttribute([])
+    },
+    option: {
+        render: "UIStack",
+        canDrop: true,
+        canDrag: true,
+    }
+})
+
+export const Example = new NodeType({
+    id: 0,
+    name: '@Example',
+    attributes: {
+        ...StackAttributes,
+        children: new ChildrenAttribute([])
+    },
+    option: {
+        render: "UIStack",
+        canDrop: true,
+        canDrag: true,
+    }
+})
+
+export const SystemNodeTypes = [Page, Component, Stack, Label, Example]

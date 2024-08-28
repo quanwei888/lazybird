@@ -27,7 +27,7 @@ export const Page: React.FC = () => {
 
     const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
         console.log(event);
-        if (event.key === 'Backspace' && project?.selectedId && project.selectedId !== project.currentPage?.id) {
+        if (event.key === 'Backspace' && project?.selectedId && project.selectedId !== project.currentPageId?.id) {
             // 删除被选中的节点
             event.currentTarget.blur();
             NodeManager.removeNode(project.selectedId);
@@ -49,13 +49,16 @@ export const Page: React.FC = () => {
         }
     }, [project]);
 
-    log.debug(`[Render][Page]`);
+    log.debug(`[Render][Page]`,project);
+    if (!project || !project.currentPageId) return null;
+    const pageNode = NodeManager.getNode(project.currentPageId);
+    console.log('pageNode', pageNode,NodeManager.nodes);
 
     return (
         <div className="max-w-full h-full px-12 py-4 rounded" id="_page_" tabIndex={0}>
             <div className="max-w-[768px] h-full bg-white">
                 <CustomDragLayer/>
-                {project?.currentPage && <Node node={project.currentPage}/>}
+                <Node node={pageNode}/>
             </div>
         </div>
     );

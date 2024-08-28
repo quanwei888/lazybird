@@ -1,6 +1,6 @@
 import React, {createContext, useContext, useEffect, useState, ReactNode} from 'react';
 import {useQuery} from "@tanstack/react-query";
-import {loadProject} from "./test.ts";
+import {loadProject} from "./DemoProject.ts";
 import {NodeManager, Project} from "./index.ts";
 import _ from 'lodash';
 
@@ -11,6 +11,7 @@ interface ProjectContextProps {
         setCurrentDrag: (drag: any) => void;
         setCurrentPageId: (id: string | null) => void;
         setSelectedId: (id: string | null) => void;
+        addPage: (id: string) => void;
         reload: () => void;
     };
 }
@@ -33,51 +34,54 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({children}) => {
 
     useEffect(() => {
         if (data) {
+            console.log('load data ', data);
             setProject(data);
         }
     }, [data]);
 
+    if (!project) return null;
+
     const actions = {
         setCurrentDrop(drop: any) {
             if (!_.isEqual(drop, project?.currentDrop)) {
-                if (project) {
-                    project.currentDrop = drop;
-                    this.reload();
-                }
-            }
-        },
-        setCurrentDrag(drag: any) {
-            if (project) {
-                project.currentDrag = drag;
+                project.currentDrop = drop;
                 this.reload();
             }
         },
+        setCurrentDrag(drag: any) {
+            project.currentDrag = drag;
+            this.reload();
+        },
+        addPage(id: string) {
+            project.pages.push(id);
+            this.reload();
+        },
         setCurrentPageId(id: string | null) {
-            if (project && id !== project.currentPage?.id) {
-                project.currentPage = NodeManager.getNode(id);
+            if (id !== project.currentPageId) {
+                project.currentPageId = id;
                 project.selectedId = null;
                 this.reload();
             }
         },
         setSelectedId(id: string | null) {
-            if (project && id !== project.selectedId) {
+            if (id !== project.selectedId) {
                 project.selectedId = id;
                 this.reload();
             }
         },
         reload: () => {
-            if (project) {
-                const currentPageNode = NodeManager.getNode(project.currentPage?.id);
-                const updatedCurrentPage = {
-                    ...currentPageNode,
-                };
+            const currentPageNode = NodeManager.getNode(project.currentPageId);
+            const updatedCurrentPage = {
+                ...currentPageNode,
+            };
 
-                const newProject = new Project({id: project.id, name: project.name});
-                for (const key in project) {
-                    (newProject as any)[key] = (project as any)[key];
-                }
-                setProject(newProject);
+            console.log('updatedCurrentPage', NodeManager.getNode(project.currentPageId));
+
+            const newProject = new Project({id: project.id, name: project.name});
+            for (const key in project) {
+                (newProject as any)[key] = (project as any)[key];
             }
+            setProject(newProject);
         },
     };
 

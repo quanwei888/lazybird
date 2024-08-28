@@ -25,25 +25,26 @@ const RenderNode = forwardRef<HTMLDivElement, RenderNodeProps>(({children, node,
     classNames = [...classNames];
 
     // 遍历节点的属性，添加样式类名
-    Object.keys(node.attributes).forEach(attrKey => {
-        const attribute = nodeType?.getAttribute(attrKey);
+    Object.keys(node.attributes).forEach(attrId => {
+        const attribute = nodeType.getAttribute(attrId);
         if (attribute instanceof StyleAttribute) {
-            classNames.push(attribute.getClassName(node.getAttribute(attrKey)));
+            classNames.push(attribute.getClassName(node.getAttribute(attrId)));
         }
     });
 
     // 初始化属性对象
     const props: { [key: string]: any } = {};
-    Object.keys(node.attributes).forEach(attrKey => {
-        const attribute = nodeType?.getAttribute(attrKey);
+    Object.keys(node.attributes).forEach(attrId => {
+        const attribute = nodeType.getAttribute(attrId);
         if (attribute instanceof PropsAttribute) {
-            props[attribute.name] = node.getAttribute(attrKey);
+            props[attribute.name] = node.getAttribute(attrId);
         }
     });
 
+
     // 渲染节点内容
     const renderNodeContent = () => {
-        switch (nodeType?.option.render) {
+        switch (nodeType.option.render) {
             case "UIStack":
                 return (
                     <UIStack ref={ref} id={node.id} className={classNames.join(" ")} {...props}>

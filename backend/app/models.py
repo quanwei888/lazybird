@@ -54,13 +54,10 @@ class AttributesPublic(SQLModel):
 
 
 class NodeTypeBase(SQLModel):
-    uuid: str
     name: str
-    type: str = "NodeType"
-    projectId: int
+    project_id: int
     is_private: bool = True
-    option: Dict = Field(default_factory=dict, sa_column=Column(JSON))
-    attribute_ids: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    data: Dict = Field(default_factory=dict, sa_column=Column(JSON))
 
 
 class NodeType(NodeTypeBase, table=True):
@@ -75,7 +72,6 @@ class NodeTypeCreate(NodeTypeBase):
 
 
 class NodeTypeUpdate(NodeTypeBase):
-    uuid: str
     mod_time: datetime = Field(default_factory=lambda: datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"))
 
 
@@ -113,7 +109,6 @@ class NodeCreate(NodeBase):
 
 
 class NodeUpdate(NodeBase):
-    uuid: str
     mod_time: datetime = Field(default_factory=lambda: datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"))
 
 
@@ -144,7 +139,6 @@ class ProjectCreate(ProjectBase):
 
 
 class ProjectUpdate(ProjectBase):
-    id: int
     mod_time: datetime = Field(default_factory=lambda: datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"))
 
 
