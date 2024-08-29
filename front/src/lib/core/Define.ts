@@ -3,18 +3,12 @@ import {
     ColorAttribute,
     LayoutAttribute,
     PropsAttribute,
-    NodeManager,
     MapStyleAttribute,
     SizeAttribute,
     NodeType,
-    NodeTypeManager,
     ComponentNodeType,
-    ChildrenAttribute,
-    Project,
-    Attribute
+    ChildrenAttribute
 } from "./index.ts";
-import * as Api from "../../api/api.ts";
-import {PlainBase} from "../utils.ts";
 
 
 export const title = (value = "this is a title") => new PropsAttribute({
