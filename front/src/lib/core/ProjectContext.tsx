@@ -12,6 +12,9 @@ interface ProjectContextProps {
         setCurrentPageId: (id: string | null) => void;
         setSelectedId: (id: string | null) => void;
         addPage: (id: string) => void;
+        removePage: (id: string) => void;
+        addComponent: (id: string) => void;
+        removeComponent: (id: string) => void;
         reload: () => void;
     };
 }
@@ -56,6 +59,29 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({children}) => {
             project.pages.push(id);
             this.reload();
         },
+        removePage(id: string) {
+            if (project.pages.includes(id)) {
+                const index = project.pages.indexOf(id);
+                project.pages.splice(index, 1);
+
+                if (id == project.currentPageId) {
+                    project.currentPageId = null;
+                }
+                this.reload();
+
+            }
+        },
+        addComponent(id: string) {
+            project.components.push(id);
+            this.reload();
+        },
+        removeComponent(id: string) {
+            if (project.components.includes(id)) {
+                const index = project.components.indexOf(id);
+                project.components.splice(index, 1);
+                this.reload();
+            }
+        },
         setCurrentPageId(id: string | null) {
             if (id !== project.currentPageId) {
                 project.currentPageId = id;
@@ -70,11 +96,6 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({children}) => {
             }
         },
         reload: () => {
-            const currentPageNode = NodeManager.getNode(project.currentPageId);
-            const updatedCurrentPage = {
-                ...currentPageNode,
-            };
-
             console.log('updatedCurrentPage', NodeManager.getNode(project.currentPageId));
 
             const newProject = new Project({id: project.id, name: project.name});

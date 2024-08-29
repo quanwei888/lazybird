@@ -22,10 +22,19 @@ export const loadProject = async (): Promise<Project> => {
 };
 
 let globalProject: Project | null = null;
-setInterval(async () => {
+
+
+const syncInterval = setInterval(async () => {
     if (globalProject) {
         console.log("sync project");
         await syncProject(globalProject);
     }
-}, 2000);
+}, 1000);
 
+window.onerror = function (message, source, lineno, colno, error) {
+    if (globalProject) {
+        clearInterval(syncInterval);
+        console.log("Error occurred, sync interval cleared:", message);
+    }
+    return false; // Let the error propagate
+};

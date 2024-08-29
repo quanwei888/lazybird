@@ -49,13 +49,14 @@ def read_node_type(session: SessionDep, user: CurrentUser, id: int) -> Any:
     return node_type
 
 
-@router.post("/", response_model=NodeTypePublic)
+@router.post("/", response_model=NodeTypePublic|None)
 def create_node_type(
         session: SessionDep, user: CurrentUser, node_type_in: NodeTypeCreate
 ) -> Any:
     """
     Create new node type.
     """
+    print(node_type_in)
     node_type_data = node_type_in.dict()
     node_type_data["user_id"] = user.id
     node_type = NodeType(**node_type_data)

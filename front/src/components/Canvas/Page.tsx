@@ -55,8 +55,8 @@ export const Page: React.FC = () => {
     console.log('pageNode', pageNode,NodeManager.nodes);
 
     return (
-        <div className="max-w-full h-full px-12 py-4 rounded" id="_page_" tabIndex={0}>
-            <div className="max-w-[768px] h-full bg-white">
+        <div className="max-w-full h-full mx-12 my-4 rounded bg-white overflow-y-auto" id="_page_" tabIndex={0}>
+            <div className="w-full h-full rounded-lg shadow-lg">
                 <CustomDragLayer/>
                 <Node node={pageNode}/>
             </div>

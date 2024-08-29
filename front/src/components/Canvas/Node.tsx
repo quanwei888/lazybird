@@ -202,7 +202,7 @@ export const Node: React.FC<NodeProps> = ({node}) => {
     if (node.id === project.currentDrag?.id) {
         classNames.push('opacity-20', 'outline-none');
     }
-console.log(classNames);
+
     return (
         <RenderNode node={node} ref={ref} classNames={classNames}>
             <SelectedBox/>

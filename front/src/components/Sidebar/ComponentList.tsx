@@ -1,86 +1,95 @@
-import {useProject} from "@/lib/core/ProjectContext";
-import {Search, Plus, MoreVertical} from "lucide-react";
-import {Button} from "@/components/ui/button";
-import * as Icon from '@radix-ui/react-icons';
-import {Input} from "@/components/ui/input";
-import {NodeManager, NodeTypeManager} from "@/lib/core";
-import {Label} from "@/components/ui/label.tsx";
-import {Separator} from "@/components/ui/separator.tsx";
+import { useProject } from "@/lib/core/ProjectContext";
+import {  Plus, MoreVertical } from "lucide-react";
+import { NodeManager, NodeTypeManager } from "@/lib/core";
 import {
     Command,
-    CommandDialog,
     CommandEmpty,
     CommandGroup,
     CommandInput,
     CommandItem,
     CommandList,
     CommandSeparator,
-    CommandShortcut,
 } from "@/components/ui/command"
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { MenuButton } from "@/components/Common/MenuButton.tsx";
 
 export const ComponentList: React.FC = () => {
-    const {project, actions} = useProject();
+    const { project, actions } = useProject();
 
     if (!project) return null;
 
-    const selectedItem = project.currentPageId && NodeManager.getNode(project.currentPageId).id;
-    const addNewPage = () => {
-        const nodeType = NodeTypeManager.getNodeTypeByName("@Page")
-        const pageNode = nodeType.createNode();
-        actions.setCurrentPageId(pageNode.id);
-        actions.addPage(pageNode.id);
+    const selectedItem = project.currentPageId ? NodeManager.getNode(project.currentPageId).id : "";
+    const generateUniqueName = (baseName: string, existingNames: string[]): string => {
+        let index = 0;
+        let newName = `${baseName}_${index}`;
+        while (existingNames.includes(newName)) {
+            index++;
+            newName = `${baseName}_${index}`;
+        }
+        return newName;
+    };
+
+    const handleAdd = (command: string) => {
+        if (command === "addPage") {
+            const nodeType = NodeTypeManager.getNodeTypeByName("@Page");
+            const node = nodeType.createNode();
+            const existingPageNames = project.pages.map(pageId => NodeManager.getNode(pageId).name);
+            node.name = generateUniqueName("Page", existingPageNames);
+
+            actions.setCurrentPageId(node.id);
+            actions.addPage(node.id);
+        } else if (command === "addComponent") {
+            const nodeType = NodeTypeManager.getNodeTypeByName("@Component");
+            const node = nodeType.createNode();
+            const existingComponentNames = project.components.map(componentId => NodeManager.getNode(componentId).name);
+            node.name = generateUniqueName("Component", existingComponentNames);
+
+            actions.addComponent(node.id);
+            actions.setCurrentPageId(node.id);
+        }
     };
 
     return (
-        <div className="flex-1 overflow-auto">
-            <Command value={selectedItem} className="flex-1 overflow-auto">
-                <CommandList className="h-full">
-                    <div className="flex w-full items-center justify-between">
-                        <CommandInput className="w-48" placeholder="Type a command or search..."/>
-                        <Button size="icon" variant="ghost" className="h-8 w-8" onClick={addNewPage}>
-                            <Plus className="h-3.5 w-3.5"/>
-                        </Button>
-                    </div>
-                    <CommandEmpty>No results found.</CommandEmpty>
-                    <CommandGroup heading="Pages">
-                        {project.pages.map((nodeId, index) => {
-                            const node = NodeManager.getNode(nodeId);
-                            return (
-                                <div className="key={index} flex justify-between">
-                                    <CommandItem value={node.id}>{node.name}</CommandItem>
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button size="icon" variant="ghost" className="h-8 w-8">
-                                                <MoreVertical className="h-3.5 w-3.5"/>
-                                            </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end">
-                                            <DropdownMenuItem>Edit</DropdownMenuItem>
-                                            <DropdownMenuItem>Export</DropdownMenuItem>
-                                            <DropdownMenuSeparator/>
-                                            <DropdownMenuItem>Trash</DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-                                </div>
-                            )
-                        })}
-                    </CommandGroup>
-                    <CommandSeparator/>
-                    <CommandGroup heading="Components">
-                        {project.components.map((nodeId, index) => (
-                            <CommandItem key={index}>{NodeManager.getNode(nodeId).name}</CommandItem>
-                        ))}
-                    </CommandGroup>
-                </CommandList>
-            </Command>
-        </div>
-    );
+        <Command value={selectedItem}>
+            <div className="flex w-full items-center justify-between space-x-2 mb-2">
+                <CommandInput placeholder="Type a command or search..." className="h-8" />
+                <MenuButton onValueChange={handleAdd} options={{ addPage: "Add Page", addComponent: "Add Component" }}>
+                    < Plus className="h-3.5 w-3.5" />
+                </MenuButton>
+            </div>
+            <CommandList>
+                <CommandEmpty>No results found.</CommandEmpty>
+                <CommandGroup heading="Pages">
+                    {project.pages.map((nodeId, index) => {
+                        const node = NodeManager.getNode(nodeId);
+                        return (
+                            <CommandItem key={nodeId} value={node.id} className="w-full flex justify-between"
+                                onSelect={() => actions.setCurrentPageId(node.id)}>
+                                <span>{node.name}</span>
+                                <MenuButton onValueChange={() => actions.removePage(nodeId)}
+                                    options={{ delete: "Delete" }}>
+                                    < MoreVertical className="h-3.5 w-3.5" />
+                                </MenuButton></CommandItem>
+                        )
+                    })}
+                </CommandGroup>
+                <CommandSeparator />
+                <CommandGroup heading="Components">
+                    {project.components.map((nodeId, index) => {
+                        const node = NodeManager.getNode(nodeId);
+                        return (
+                            <CommandItem key={nodeId} value={node.id} className="w-full flex justify-between"
+                                onSelect={() => actions.setCurrentPageId(node.id)}>
+                                <span>{node.name}</span>
+                                <MenuButton onValueChange={() => actions.removeComponent(nodeId)}
+                                    options={{ delete: "Delete" }}>
+                                    <MoreVertical className="h-3.5 w-3.5" />
+                                </MenuButton>
+                            </CommandItem>
+                        )
+                    })}
+                </CommandGroup>
+            </CommandList>
+        </Command>
+    )
+        ;
 };

@@ -40,8 +40,13 @@ export class Project {
 export const syncProject = async (project: Project): Promise<void> => {
     const {id,currentDrag,currentDrop,selectedId, ...projectData} = project;
     projectData.nodes = [];
-    projectData.pages.forEach((pageNodeId) => {
-        NodeManager.getTreeNodes(pageNodeId).forEach((node) => {
+    projectData.pages.forEach((nodeId) => {
+        NodeManager.getTreeNodes(nodeId).forEach((node) => {
+            projectData.nodes.push(node);
+        });
+    });
+    projectData.components.forEach((nodeId) => {
+        NodeManager.getTreeNodes(nodeId).forEach((node) => {
             projectData.nodes.push(node);
         });
     });
@@ -50,7 +55,6 @@ export const syncProject = async (project: Project): Promise<void> => {
         name: project.name,
         data: projectData,
     });
-    console.log(response);
 }
 export const fetchProject = async (id: number): Promise<Project> => {
     const projectData = await Api.getProjectById(id);

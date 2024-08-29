@@ -12,13 +12,13 @@ import {SizeSetting} from "./SizeSetting";
 
 export const PropertyPanel: React.FC = () => {
     const {project, actions} = useProject();
-    if (!project?.selectedId) return null;
+    if (!project?.selectedId) return <div className="w-96 h-full overflow-y-auto px-4">No node found</div>;;
 
     const node = NodeManager.getNode(project.selectedId);
-    if (!node) return null;
+    if (!node) return <div className="w-96 h-full overflow-y-auto px-4">No node found</div>;
 
     const nodeType = NodeTypeManager.getNodeType(node.nodeTypeId);
-    if (!nodeType) return null;
+    if (!nodeType) return <div className="w-96 h-full overflow-y-auto px-4">No node type found</div>;
 
     const attributes = nodeType.getAttributes();
     const grouped = Object.entries(attributes).reduce((acc, [attrId, attribute]) => {
@@ -32,7 +32,7 @@ export const PropertyPanel: React.FC = () => {
 
 
     return (
-        <div className="text-sm px-4 w-full">
+        <div className="w-96 h-full overflow-y-auto px-4">
             {Object.keys(grouped).map((group) => (
                 <div key={group} className="mb-6">
                     <span className="bold mt-4">{group}</span>
@@ -106,7 +106,7 @@ export const PropertyPanel: React.FC = () => {
                     </div>
                 </div>
             ))}
-            <pre>{JSON.stringify(node, null, 2)}</pre>
+            <div className="w-24"><pre>{JSON.stringify(node.attributes, null, 2)}</pre></div>
         </div>
     );
 };
