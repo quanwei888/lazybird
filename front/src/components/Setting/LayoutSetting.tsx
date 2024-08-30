@@ -1,11 +1,10 @@
 import React from "react";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { cn } from "@/lib/utils";
+import {Button} from "@/components/ui/button";
+import {Label} from "@/components/ui/label";
+import {Tabs, TabsList, TabsTrigger} from "@/components/ui/tabs";
+import {cn} from "@/lib/utils";
 
-interface LayoutSettingProps {
-    attribute: any;
+interface Props {
     currentValue: {
         direction: string;
         position: string;
@@ -13,8 +12,8 @@ interface LayoutSettingProps {
     onChange: (value: { direction: string; position: string }) => void;
 }
 
-export const LayoutSetting: React.FC<LayoutSettingProps> = ({ attribute, currentValue, onChange }) => {
-    const { direction, position } = currentValue;
+export const LayoutSetting: React.FC<Props> = ({currentValue, onChange}) => {
+    const {direction, position} = currentValue;
     const directions = ["flex-row", "flex-col"];
     const positions: { [key: string]: string[] } = {
         "flex-row": [
@@ -48,11 +47,11 @@ export const LayoutSetting: React.FC<LayoutSettingProps> = ({ attribute, current
 
     const handleDirectionChange = (newDirection: string) => {
         const defaultPosition = positions[newDirection][0];
-        onChange({ direction: newDirection, position: defaultPosition });
+        onChange({direction: newDirection, position: defaultPosition});
     };
 
     const handlePositionChange = (newPosition: string) => {
-        onChange({ direction: validDirection, position: newPosition });
+        onChange({direction: validDirection, position: newPosition});
     };
 
     return (

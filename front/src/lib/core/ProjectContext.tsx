@@ -1,26 +1,50 @@
 import React, {createContext, useContext, useEffect, useState, ReactNode} from 'react';
 import {useQuery} from "@tanstack/react-query";
-import {loadProject} from "./DemoProject.ts";
-import {NodeManager, Project} from "./index.ts";
+import * as Core from "./node.ts";
+import "./test.ts";
+import {NodeType, Design, setNodeProps} from "./node.ts";
 import _ from 'lodash';
 
-interface ProjectContextProps {
-    project: Project | null;
+export interface DragItem {
+    id: string,
+    type: string,
+    width: number,
+    height: number
+}
+
+export interface DropItem {
+    id: string,
+    pos?: number,
+}
+
+type EditMode = 'Page' | 'NodeType';
+
+export interface State {
+    dragItem?: DragItem;
+    dropItem?: DropItem;
+    editMode: EditMode;
+    seletecedNodeId?: string;
+}
+
+interface ProjectContextType {
+    state: State | null;
     actions: {
-        setCurrentDrop: (drop: any) => void;
-        setCurrentDrag: (drag: any) => void;
-        setCurrentPageId: (id: string | null) => void;
-        setSelectedId: (id: string | null) => void;
-        addPage: (id: string) => void;
-        removePage: (id: string) => void;
-        addComponent: (id: string) => void;
-        removeComponent: (id: string) => void;
-        reload: () => void;
+        startDrag: (dragItem: DragItem) => void;
+        endDrag: () => void;
+        startHover: (dropItem: DropItem) => void;
+        endHover: () => void;
+        addPage: (pageId: string) => void;
+        delPage: (pageId: string) => void;
+        addComponent: (componentId: string) => void;
+        delComponent: (componentId: string) => void;
+        editDesign: (designId: string) => void;
+        selectNode: (nodeId: string) => void;
+        setNodeProps: (nodeId: string, name: string, value: any) => void;
     };
 }
 
 // 定义 Context
-export const ProjectContext = createContext<ProjectContextProps | undefined>(undefined);
+export const ProjectContext = createContext<ProjectContextType | null>(null);
 
 interface ProjectProviderProps {
     children: ReactNode;
@@ -28,96 +52,84 @@ interface ProjectProviderProps {
 
 // 创建 Provider 组件
 export const ProjectProvider: React.FC<ProjectProviderProps> = ({children}) => {
-    const [project, setProject] = useState<Project | null>(null);
+    const [state, setState] = useState<State | null>(null);
 
-    const {data, isLoading} = useQuery({
+    const {data} = useQuery({
         queryKey: ['loadProject'],
-        queryFn: () => loadProject(),
+        queryFn: () => {
+            const data: State = {
+                editMode: "Page",
+            };
+            return data; // Return the data directly
+        },
     });
 
     useEffect(() => {
         if (data) {
             console.log('load data ', data);
-            setProject(data);
+            setState(data);
         }
-    }, [data]);
+    }, [data]); // Add dependency array
 
-    if (!project) return null;
+    if (!state) return null;
 
     const actions = {
-        setCurrentDrop(drop: any) {
-            if (!_.isEqual(drop, project?.currentDrop)) {
-                project.currentDrop = drop;
-                this.reload();
+        startDrag(dragItem: DragItem) {
+            setState({...state, dragItem});
+        },
+        endDrag() {
+            setState({...state, dragItem: undefined});
+        },
+        startHover(dropItem: DropItem) {
+            if (!_.isEqual(state.dropItem, dropItem)) {
+                setState({...state, dropItem});
             }
         },
-        setCurrentDrag(drag: any) {
-            project.currentDrag = drag;
-            this.reload();
+        endHover() {
+            setState({...state, dropItem: undefined});
         },
-        addPage(id: string) {
-            project.pages.push(id);
-            this.reload();
+        addPage(pageId: string) {
+            Core.addPage(pageId)
+            setState({...state});
         },
-        removePage(id: string) {
-            if (project.pages.includes(id)) {
-                const index = project.pages.indexOf(id);
-                project.pages.splice(index, 1);
-
-                if (id == project.currentPageId) {
-                    project.currentPageId = null;
-                }
-                this.reload();
-
-            }
+        delPage(pageId: string) {
+            Core.delPage(pageId);
+            setState({...state});
         },
-        addComponent(id: string) {
-            project.components.push(id);
-            this.reload();
+        addComponent(componentId: string) {
+            Core.addComponent(componentId);
+            setState({...state});
         },
-        removeComponent(id: string) {
-            if (project.components.includes(id)) {
-                const index = project.components.indexOf(id);
-                project.components.splice(index, 1);
-                this.reload();
-            }
+        delComponent(componentId: string) {
+            Core.delComponent(componentId);
+            setState({...state});
         },
-        setCurrentPageId(id: string | null) {
-            if (id !== project.currentPageId) {
-                project.currentPageId = id;
-                project.selectedId = null;
-                this.reload();
-            }
+        editDesign(designId: string) {
+            Core.switchDesign(designId);
+            setState({...state, editMode: "Page"});
         },
-        setSelectedId(id: string | null) {
-            if (id !== project.selectedId) {
-                project.selectedId = id;
-                this.reload();
-            }
+        selectNode(nodeId: string) {
+            setState({...state, seletecedNodeId: nodeId});
         },
-        reload: () => {
-            console.log('updatedCurrentPage', NodeManager.getNode(project.currentPageId));
-
-            const newProject = new Project({id: project.id, name: project.name});
-            for (const key in project) {
-                (newProject as any)[key] = (project as any)[key];
-            }
-            setProject(newProject);
-        },
+        setNodeProps(nodeId: string, name: string, value: any) {
+            Core.setNodeProps(nodeId, name, value);
+            setState({...state});
+        }
     };
 
     return (
-        <ProjectContext.Provider value={{project, actions}}>
+        <ProjectContext.Provider value={{state, actions}}>
             {children}
         </ProjectContext.Provider>
     );
 }
 
 // 自定义 Hook
-export const useProject = () => {
+export const useProject = (): ProjectContextType => {
     const context = useContext(ProjectContext);
-    if (context === undefined) {
+    if (context === null) {
         throw new Error("useProject must be used within a ProjectProvider");
     }
     return context;
 }
+

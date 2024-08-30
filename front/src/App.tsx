@@ -2,13 +2,13 @@ import {DndProvider} from "react-dnd";
 import {HTML5Backend} from "react-dnd-html5-backend";
 import {ProjectProvider} from "@/lib/core/ProjectContext"
 import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
-import {Page} from "@/components/Canvas/Page";
-import {PropertyPanel} from "@/components/Setting/PropertyPanel";
+//import {Design} from "@/components/Canvas/Design";
+//import {Setting} from "@/components/Setting/Setting";
 import {Sidebar} from "@/components/Sidebar/Sidebar.tsx";
-import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs.tsx";
-import {Tree} from "@/components/Sidebar/Layers/Tree.tsx";
-import {ToolBox} from "@/components/Sidebar/ToolBox.tsx";
+import Test from "@/components/Test.tsx";
 import React from "react";
+import {PageCanvas} from "@/components/Render/PageCanvas.tsx";
+import {Setting} from "@/components/Setting/Setting.tsx";
 
 
 const queryClient = new QueryClient()
@@ -27,10 +27,10 @@ function App() {
                                 <Sidebar/>
                             </div>
                             <div className="flex-1 h-full flex flex-col overflow-hidden">
-                                <Page/>
+                                <PageCanvas/>
                             </div>
                             <div className="flex-0 h-full border-l bg-white flex flex-col overflow-hidden">
-                                <PropertyPanel/>
+                                <Setting/>
                             </div>
                         </main>
                     </div>

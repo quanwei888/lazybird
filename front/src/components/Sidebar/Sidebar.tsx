@@ -1,7 +1,7 @@
 import {Tabs, TabsList, TabsTrigger} from "@/components/ui/tabs"
-import {ComponentList} from "./ComponentList";
+import {ItemList} from "./Pages/ItemList.tsx";
 import React from "react";
-import {ToolBox} from "./ToolBox";
+import {ToolBox} from "./Inserts/ToolBox";
 
 
 export const Sidebar: React.FC = () => {
@@ -9,15 +9,15 @@ export const Sidebar: React.FC = () => {
     return (
         <>
             <Tabs defaultValue="Pages" onValueChange={setValue}>
-                <TabsList className="w-full mb-2 rounded-none" >
+                <TabsList className="w-full mb-2 rounded-none">
                     <TabsTrigger value="Pages">Pages</TabsTrigger>
                     <TabsTrigger value="Layers">Layers</TabsTrigger>
-                    <TabsTrigger value="Insert">Inserts</TabsTrigger>
+                    <TabsTrigger value="Inserts">Inserts</TabsTrigger>
                 </TabsList>
             </Tabs>
             <div className="flex-0 w-full h-full  overflow-y-auto">
-                {value === "Pages" && <ComponentList></ComponentList>}
-                {value === "Insert" && <ToolBox></ToolBox>}
+                {value === "Pages" && <ItemList></ItemList>}
+                {value === "Inserts" && <ToolBox></ToolBox>}
             </div>
         </>
     )
